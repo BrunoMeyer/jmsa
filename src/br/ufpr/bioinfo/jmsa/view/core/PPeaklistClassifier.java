@@ -52,6 +52,7 @@ public class PPeaklistClassifier extends JPanel
     public List<OPeaklist> DBPeaks;
     public FMainWindow fmain;
     private NameNumber[] distances;
+    
     public PPeaklistClassifier(FMainWindow fmain)
     {
     	this.fmain = fmain;
