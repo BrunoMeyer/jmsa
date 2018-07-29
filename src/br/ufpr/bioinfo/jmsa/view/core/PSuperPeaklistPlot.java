@@ -73,6 +73,7 @@ public class PSuperPeaklistPlot extends JPanel
         //
         JFreeChart chart = ChartFactory.createXYBarChart("SuperSpectro", "MASS", false, "INTENSITY", dataset, PlotOrientation.VERTICAL, true, true, true);
         chart.getLegend().setPosition(RectangleEdge.LEFT);
+        chart.getLegend().setVisible(false);
         //
         //
         XYPlot xyPlot = chart.getXYPlot();

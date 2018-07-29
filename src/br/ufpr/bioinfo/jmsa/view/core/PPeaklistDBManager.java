@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,6 +23,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -33,7 +36,7 @@ import br.ufpr.bioinfo.jmsa.analyser.CPeaklistAnalyser;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
 import br.ufpr.bioinfo.jmsa.view.FMainWindow;
 
-public class PPeaklistClassifier extends JPanel
+public class PPeaklistDBManager extends JPanel
 {
     public JScrollPane scrollPanePeaklistFiles = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     public DefaultTableModel defaultTableModel = new DefaultTableModel();
@@ -52,37 +55,37 @@ public class PPeaklistClassifier extends JPanel
     public FMainWindow fmain;
     private NameNumber[] distances;
     
-    public PPeaklistClassifier(FMainWindow fmain)
+    public PSuperPeaklistPlot superSpectro = new PSuperPeaklistPlot();
+    public PPeaklistDBManager(FMainWindow fmain)
     {
-    	// Set layout configurations
     	this.fmain = fmain;
     	myContent.setLayout((LayoutManager) new BoxLayout(myContent, BoxLayout.Y_AXIS));
-        
-    	setLayout(new BorderLayout(2, 2));
-        
+        //
+    	
+    	setLayout(new BorderLayout(1, 1));
+    	
+    	//
     	table.setVisible(true);
     	table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         table.setAutoCreateRowSorter(true);
         table.getTableHeader().setReorderingAllowed(false);
-        
+        //
         scrollPanePeaklistFiles.setMinimumSize(new Dimension(200, 0));
         scrollPanePeaklistFiles.setPreferredSize(new Dimension(200, 0));
+        
         //
+        //myContent.add(spectreVisualizer);
         
-        // Add panel that contains table and spectre of peaklist selected
-        myContent.add(spectreVisualizer);
-        
-        
-        // On click in button of Classify
         buttonClassify.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
             	selectPeak();
             }
         });
+        
+        
     }
     
-    // Update the view of table and spectre of peaklist selected
     public void reloadSpectresVisualizer() {
     	int selected = selectField.getSelectedIndex();
     	OPeaklist peaklistSelected = loadingPeakLists.get(selected);
@@ -92,10 +95,10 @@ public class PPeaklistClassifier extends JPanel
         
         spectreVisualizer.add(peaklistSelected.getPeaklistPlot(false));//checkBoxMenuItemPlotEnableIntensity.isSelected())
         spectreVisualizer.add(peaklistSelected.getPeaklistTable());
-        revalidate();    
+        // revalidate();
+        
+        
     }
-    
-    
     
     private static class JTableButtonRenderer implements TableCellRenderer {        
         @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -105,7 +108,6 @@ public class PPeaklistClassifier extends JPanel
     }
     
     
-    // Class that help on sorting of the result of classifier
     private class NameNumber 
     {
 
@@ -136,12 +138,13 @@ public class PPeaklistClassifier extends JPanel
         public OPeaklist pk;
     }
     
-    
-    
     public void selectPeak() {
+    	
     	table.setDefaultRenderer(Object.class, new PeaklistSimilarityTableStringCellRenderer(peaklists));
     	
     	distances = new NameNumber[peaklists.size()];
+    	
+    	
     	
         int selected = selectField.getSelectedIndex();
         
@@ -157,7 +160,8 @@ public class PPeaklistClassifier extends JPanel
         defaultTableModel.addColumn("Total Match peaks", new Object[] {});
         defaultTableModel.addColumn("Move to Loading", new Object[] {});
         
-        AbstractAction moveToLoad = new AbstractAction(){
+        AbstractAction moveToLoad = new AbstractAction()
+        {
             public void actionPerformed(ActionEvent e)
             {
             	int modelRow = Integer.valueOf( e.getActionCommand() );
@@ -165,6 +169,7 @@ public class PPeaklistClassifier extends JPanel
 	                JTable table = (JTable)e.getSource();
 	                if( !fmain.isInLoad(distances[modelRow].pk) ) {
 		                fmain.addPeaklistToLoadingTable(distances[modelRow].pk);
+//		                fmain.removePeaklistFromDBTable(distances[modelRow].pk);
 		                ((DefaultTableModel)table.getModel()).setValueAt("", modelRow, 4);
 	                }
 	                
@@ -219,69 +224,68 @@ public class PPeaklistClassifier extends JPanel
         
     }
     
-    
-    public void reloadClassifier(List<OPeaklist> newLoadingPeakLists, List<OPeaklist> newPeaklists){
-    	
-    	if(newPeaklists.size() <= 0)
-    		return;
-    	
-    	if(newPeaklists != null) {
-    		peaklists = newPeaklists;
-    		loadingPeakLists = newLoadingPeakLists;
-    	}
-    	
-    	myContent.remove(scrollPanePeaklistFiles);
-    	myContent.removeAll();
-    	
-    	
-    	add(scrollPanePeaklistFiles, BorderLayout.CENTER);
-    	
-        
-        
-    	
-        NameNumber[] distances = new NameNumber[peaklists.size()];
-
-        String[] names  = new String[loadingPeakLists.size()];
-        for (int i = 0; i < loadingPeakLists.size(); i++)
+   
+    public void reloadClassifier(List<OPeaklist> peaklists){
+    	System.out.println(peaklists);
+    	PPeaklistFiles newList = fmain.panelLoadingPeaklistFiles.clone();
+//    	newList.setMarkersVisibility(false);
+    	newList.defaultTableModel.addTableModelListener(new TableModelListener()
         {
-        	names[i] = loadingPeakLists.get(i).toString();
-        }
-        
-        
-        selectField = new JComboBox(names);
-    	
-    	selectField.setVisible(true);
-    	
-    	selectField.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-            	reloadSpectresVisualizer();
+            public void tableChanged(TableModelEvent e)
+            {
+
+                int rowIndex = newList.table.getSelectedRow();
+                int colIndex = newList.table.getSelectedColumn();
+                System.out.println(rowIndex);
+                System.out.println(colIndex);
+                if(colIndex == 1) {
+                	OPeaklist peaklist = peaklists.get(rowIndex);
+                	peaklist.reflex = !peaklist.reflex;
+                	superSpectro.buildPlot(
+                			peaklists,
+                			fmain.checkBoxMenuItemPlotEnableIntensity.isSelected()
+                	);
+                	revalidate();
+                }
+                
+//                int prevTab = FMainWindow.getInstance().tabbedPaneMain.getSelectedIndex();
+//                FMainWindow.getInstance().tabbedPaneMain.setSelectedIndex(-1);
+//                FMainWindow.getInstance().tabbedPaneMain.setSelectedIndex(prevTab);
+//                //
+//                prevTab = FMainWindow.getInstance().tabbedPanePeaklist.getSelectedIndex();
+//                FMainWindow.getInstance().tabbedPanePeaklist.setSelectedIndex(-1);
+//                FMainWindow.getInstance().tabbedPanePeaklist.setSelectedIndex(prevTab);
+//                //
+//                labelStatusBarPeaklistFiles.setText(defaultTableModel.getSelectedPeaklists().size() + "/" + defaultTableModel.getRowCount());
             }
         });
-
+    	myContent.removeAll();
+    	
+    	JPanel topPanel = new JPanel();
+    	topPanel.setLayout(new GridLayout(1, 2));
+    	
+    	JLabel teste = new JLabel("Teste");
+    	JPanel topRightPanel = new JPanel();
+    	topRightPanel.add(teste);
+    	
+    	topPanel.add(topRightPanel);
+    	topPanel.add(newList);
+    	this.superSpectro.setLayout(new GridLayout(1, 0));
+    	this.superSpectro.buildPlot(
+    		peaklists,
+    		fmain.checkBoxMenuItemPlotEnableIntensity.isSelected()
+    	);
     	
     	
-    	JPanel panel = new JPanel();
-    	panel.add(selectField);
-    	
-    	
-    	myContent.add(panel);
-    	myContent.add(spectreVisualizer);
-    	myContent.add(table);
+    	myContent.add(topPanel);
+    	myContent.add(this.superSpectro);
+    	myContent.setLayout(new GridLayout(2, 1));
     	
     	scrollPanePeaklistFiles.setViewportView(myContent);
+    	add(scrollPanePeaklistFiles, BorderLayout.CENTER);
     	
-    	table.getTableHeader().setDefaultRenderer(new PeaklistSimilarityTableStringCellRenderer(peaklists, table.getTableHeader().getDefaultRenderer()));
-        
-    	
-    	
-    	selectedPeaksNumber = new JLabel("");
-    	
-
-    	panel.add(selectedPeaksNumber);
-    	panel.add(buttonClassify);
-    	
-    	reloadSpectresVisualizer();
+        revalidate();
     	
     }
     

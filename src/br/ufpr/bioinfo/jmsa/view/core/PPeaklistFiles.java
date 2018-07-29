@@ -3,7 +3,10 @@ package br.ufpr.bioinfo.jmsa.view.core;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -15,6 +18,10 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
 import br.ufpr.bioinfo.jmsa.view.FMainWindow;
 
@@ -67,6 +74,21 @@ public class PPeaklistFiles extends JPanel
         scrollPanePeaklistFiles.setPreferredSize(new Dimension(200, 0));
         
         
+    }
+    
+    public PPeaklistFiles clone() {
+    	PPeaklistFiles newCopie = new PPeaklistFiles("DB Manager",this.fmain);
+    	List<OPeaklist> peaklists = fmain.panelLoadingPeaklistFiles.defaultTableModel.getAllPeaklists();
+    	for (OPeaklist peaklist : peaklists){
+    		try {
+				OPeaklist copiePeaklist = new OPeaklist(peaklist.peaklistFile);
+				newCopie.addPeaklistToTable(copiePeaklist);
+    		} catch (ParserConfigurationException | SAXException | IOException e) {
+				e.printStackTrace();
+			}
+        }
+    	
+    	return newCopie;
     }
     
     public void clearTable()

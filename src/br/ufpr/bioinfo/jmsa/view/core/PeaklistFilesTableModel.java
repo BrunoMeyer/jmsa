@@ -37,6 +37,11 @@ public class PeaklistFilesTableModel extends AbstractTableModel
         return selectedPeaklists;
     }
     
+    public ArrayList<OPeaklist> getAllPeaklists()
+    {
+        return peaklists;
+    }
+    
     public void clear()
     {
         peaklists.clear();

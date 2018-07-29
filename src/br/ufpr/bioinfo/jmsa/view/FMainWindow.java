@@ -35,6 +35,8 @@ import br.ufpr.bioinfo.jmsa.model.event.useraction.OUserActionLoadPeakFiles;
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistSimilarity;
 import br.ufpr.bioinfo.jmsa.view.core.PSuperPeaklistPlot;
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistClassifier;
+import br.ufpr.bioinfo.jmsa.view.core.PPeaklistDBManager;
+
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistDendrogram;
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistFiles;
 import br.ufpr.bioinfo.jmsa.view.core.SIconUtil;
@@ -49,6 +51,7 @@ public class FMainWindow extends JFrame
     public JScrollPane scrollPeaklistTables = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     public JScrollPane scrollPeaklistPlots = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     public JScrollPane scrollPeaklistClassifier = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+    public JScrollPane scrollPeaklistDBManager = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     public JTabbedPane tabbedPaneFiles = new JTabbedPane(JTabbedPane.TOP);
     public JTabbedPane tabbedPaneMain = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
     public JTabbedPane tabbedPanePeaklist = new JTabbedPane(JTabbedPane.TOP);
@@ -63,9 +66,11 @@ public class FMainWindow extends JFrame
     public JPanel panelPeaklistSimilarity = new JPanel();
     public JScrollPane panelPeaklistCluster = new JScrollPane();
     public JPanel panelPeaklistClassifier = new JPanel();
+    public JPanel panelPeaklistDBManager = new JPanel();
     public JPanel panelPeaklistInformations = new JPanel();
     public PPeaklistDendrogram panelCluster = new PPeaklistDendrogram();
     public PPeaklistClassifier panelClassifier = new PPeaklistClassifier(this);
+    public PPeaklistDBManager panelDBManager = new PPeaklistDBManager(this);
     public JPanel panelInformation = new JPanel();
     public JPanel panelStatusBar = new JPanel();
     public PSuperPeaklistPlot superPeaklistPlot = new PSuperPeaklistPlot();
@@ -96,6 +101,7 @@ public class FMainWindow extends JFrame
     public JButton buttonAnalyser = new JButton("Analyser");
     public JButton buttonCluster = new JButton("Cluster");
     public JButton buttonClassifier = new JButton("DB search");
+    public JButton buttonDBManager = new JButton("DB Management");
     public JButton buttonInformation = new JButton("Information");
     public JButton buttonSelectAll = new JButton("Select All");
     public JButton buttonDeselectAll = new JButton("Deselect All");
@@ -128,6 +134,7 @@ public class FMainWindow extends JFrame
         panelPeaklistInformations.setLayout(new BoxLayout(panelPeaklistInformations, BoxLayout.Y_AXIS));
         panelCluster.setLayout(new BorderLayout(2, 2));
         panelClassifier.setLayout(new BorderLayout(2, 2));
+        panelDBManager.setLayout(new BorderLayout(2, 2));
         
         
         panelStatusBar.setLayout(new BorderLayout(2, 2));
@@ -163,6 +170,7 @@ public class FMainWindow extends JFrame
         toolBar.add(buttonAnalyser);
         toolBar.add(buttonCluster);
         toolBar.add(buttonClassifier);
+        toolBar.add(buttonDBManager);
         toolBar.add(buttonInformation);
         toolBar.add(buttonSelectAll);
         toolBar.add(buttonDeselectAll);
@@ -176,6 +184,7 @@ public class FMainWindow extends JFrame
         tabbedPaneMain.addTab("Analyser", superPeaklistPlot);
         tabbedPaneMain.addTab("Cluster", panelCluster);
         tabbedPaneMain.addTab("DB search", panelClassifier);
+        tabbedPaneMain.addTab("DB Manager", panelDBManager);
         tabbedPaneMain.addTab("Information", panelInformation);
         panelPeaklist.add(tabbedPanePeaklist, BorderLayout.CENTER);
         
@@ -233,7 +242,10 @@ public class FMainWindow extends JFrame
 	                	checkBoxMenuItemPlotEnableIntensity.isSelected()
 	                );
 	                panelCluster.reloadDendrogram(peaklists);
-	                
+	                panelDBManager.superSpectro.buildPlot(
+		                peaklists,
+		                checkBoxMenuItemPlotEnableIntensity.isSelected()
+		            );
 	                
 	                
 	                List<OPeaklist> mergeDbLoad = new ArrayList<>(dbpeaklists);
@@ -334,7 +346,10 @@ public class FMainWindow extends JFrame
             public void actionPerformed(ActionEvent e)
             {
             	List<OPeaklist> peaklists = panelLoadingPeaklistFiles.defaultTableModel.getSelectedPeaklists();
-                switch (e.getActionCommand())
+            	List<OPeaklist> dbpeaklists = panelLoadingPeaklistFilesDB.defaultTableModel.getSelectedPeaklists();
+            	List<OPeaklist> allpeaklists = panelLoadingPeaklistFiles.defaultTableModel.getAllPeaklists();
+                
+            	switch (e.getActionCommand())
                 {
                     case "ShowMSName":
                     case "ShowMSSpectrumID":
@@ -429,12 +444,19 @@ public class FMainWindow extends JFrame
                     	
                         break;
                     case "tab-db-search":
-                    	List<OPeaklist> dbpeaklists = panelLoadingPeaklistFilesDB.defaultTableModel.getSelectedPeaklists();
-                        dbpeaklists.addAll(peaklists);
+                    	dbpeaklists.addAll(peaklists);
                     	tabbedPaneMain.setSelectedComponent(panelClassifier);
                         panelClassifier.removeAll();
                         //panelClassifier.fillTable(peaklists);
                         panelClassifier.reloadClassifier(peaklists,dbpeaklists);
+                        break;
+                    case "tab-db-manager":
+                    	
+                    	tabbedPaneMain.setSelectedComponent(panelDBManager);
+                    	panelDBManager.removeAll();
+                    	
+                        //panelClassifier.fillTable(peaklists);
+                    	panelDBManager.reloadClassifier(allpeaklists);
                         break;
                     case "tab-information":
                         tabbedPaneMain.setSelectedComponent(panelInformation);
@@ -511,6 +533,7 @@ public class FMainWindow extends JFrame
         buttonAnalyser.setActionCommand("tab-analyser");
         buttonCluster.setActionCommand("tab-cluster");
         buttonClassifier.setActionCommand("tab-db-search");
+        buttonDBManager.setActionCommand("tab-db-manager");
         buttonInformation.setActionCommand("tab-information");
         buttonSelectAll.setActionCommand("select-all");
         buttonDeselectAll.setActionCommand("deselect-all");
@@ -525,6 +548,7 @@ public class FMainWindow extends JFrame
         buttonAnalyser.addActionListener(actionListener);
         buttonCluster.addActionListener(actionListener);
         buttonClassifier.addActionListener(actionListener);
+        buttonDBManager.addActionListener(actionListener);
         buttonInformation.addActionListener(actionListener);
         buttonSelectAll.addActionListener(actionListener);
         buttonDeselectAll.addActionListener(actionListener);
@@ -540,11 +564,14 @@ public class FMainWindow extends JFrame
         //        buttonAnalyser.setEnabled(false);
         buttonCluster.setEnabled(true);
         buttonInformation.setEnabled(false);
+        buttonDBManager.setEnabled(true);
         //        tabbedPaneMain.setEnabledAt(tabbedPaneMain.indexOfComponent(panelAnalyser), false);
         tabbedPaneMain.setEnabledAt(tabbedPaneMain.indexOfComponent(panelCluster), true);
         tabbedPaneMain.setEnabledAt(tabbedPaneMain.indexOfComponent(panelInformation), false);
+        tabbedPaneMain.setEnabledAt(tabbedPaneMain.indexOfComponent(panelDBManager), true);
         tabbedPanePeaklist.setEnabledAt(tabbedPanePeaklist.indexOfComponent(panelPeaklistProteins), false);
         tabbedPanePeaklist.setEnabledAt(tabbedPanePeaklist.indexOfComponent(panelPeaklistGroups), false);
+        
         //        tabbedPanePeaklist.setEnabledAt(tabbedPanePeaklist.indexOfComponent(panelPeaklistSimilarity), false);
         //        tabbedPanePeaklist.setEnabledAt(tabbedPanePeaklist.indexOfComponent(panelPeaklistInformations), false);
     }
