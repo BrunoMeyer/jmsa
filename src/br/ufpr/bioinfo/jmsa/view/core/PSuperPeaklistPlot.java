@@ -47,7 +47,7 @@ public class PSuperPeaklistPlot extends JPanel
         {
             OPeaklist peaklist = peaklists.get(i);
             XYIntervalSeries intervalSeries = new XYIntervalSeries(peaklist.toString());
-            for (OPeak peak : peaklist.peaks)
+            for (OPeak peak : peaklist.getPeaks())
             {
                 double shownABSI = peak.absi;
                 if (peaklist.reflex)

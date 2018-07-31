@@ -8,6 +8,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Box;
@@ -28,9 +29,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import br.ufpr.bioinfo.jmsa.control.CConfig;
 import br.ufpr.bioinfo.jmsa.control.CControl;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
+import br.ufpr.bioinfo.jmsa.model.SuperPeaklist;
 import br.ufpr.bioinfo.jmsa.model.event.useraction.OUserActionLoadPeakFiles;
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistSimilarity;
 import br.ufpr.bioinfo.jmsa.view.core.PSuperPeaklistPlot;
@@ -436,6 +442,15 @@ public class FMainWindow extends JFrame
                         break;
                     case "tab-analyser":
                         tabbedPaneMain.setSelectedComponent(superPeaklistPlot);
+						try {
+							SuperPeaklist merged = new SuperPeaklist((ArrayList)peaklists);
+							addPeaklistToTable(merged);
+							System.out.println(merged.getPeaks().size());
+						} catch (ParserConfigurationException | SAXException | IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+                        
                         break;
                     case "tab-cluster":
                         tabbedPaneMain.setSelectedComponent(panelCluster);

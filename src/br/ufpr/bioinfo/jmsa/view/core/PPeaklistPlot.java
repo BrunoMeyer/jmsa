@@ -40,7 +40,7 @@ public class PPeaklistPlot extends JPanel
         XYPlot xyPlot = jFreeChart.getXYPlot();
         ChartPanel chartPanel = new ChartPanel(jFreeChart);
         
-        for (Iterator<OPeak> iterator = peaklist.peaks.iterator(); iterator.hasNext();)
+        for (Iterator<OPeak> iterator = peaklist.getPeaks().iterator(); iterator.hasNext();)
         {
             OPeak peak = iterator.next();
             double val = peak.absi;

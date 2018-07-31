@@ -69,6 +69,10 @@ public class OPeaklist
         }
     }
     
+    public ArrayList<OPeak> getPeaks() {
+    	return this.peaks;
+    }
+    
     public PPeaklistTable getPeaklistTable()
     {
         if (valid)
