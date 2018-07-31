@@ -86,7 +86,7 @@ public class PPeaklistClassifier extends JPanel
     public void reloadSpectresVisualizer() {
     	int selected = selectField.getSelectedIndex();
     	OPeaklist peaklistSelected = loadingPeakLists.get(selected);
-    	selectedPeaksNumber.setText(peaklistSelected.peaks.size()+" peaks");
+    	selectedPeaksNumber.setText(peaklistSelected.getPeaks().size()+" peaks");
     	
         spectreVisualizer.removeAll();
         
@@ -182,7 +182,7 @@ public class PPeaklistClassifier extends JPanel
         	OPeaklist peaklistRow = peaklists.get(i);
             double similarity = CPeaklistAnalyser.getPeakistSimilarity(peaklistSelected, peaklistRow);
         	int matchpeaks = CPeaklistAnalyser.getMatchPeaksSimilarity(peaklistSelected, peaklistRow);
-            distances[i] = new NameNumber(peaklistRow.toString(),similarity, peaklistRow, peaklistRow.peaks.size(), matchpeaks);
+            distances[i] = new NameNumber(peaklistRow.toString(),similarity, peaklistRow, peaklistRow.getPeaks().size(), matchpeaks);
         }
     	
         Arrays.sort(distances, new Comparator<NameNumber>() {
@@ -308,7 +308,7 @@ public class PPeaklistClassifier extends JPanel
                 defaultTableModel.setValueAt(peaklistRow, row, 0);
                 defaultTableModel.setValueAt(similarity, row, col + 1);
 
-                defaultTableModel.setValueAt(peaklistRow.peaks.size()+" peaks", row, col + 2);
+                defaultTableModel.setValueAt(peaklistRow.getPeaks().size()+" peaks", row, col + 2);
 //                
             }
         }

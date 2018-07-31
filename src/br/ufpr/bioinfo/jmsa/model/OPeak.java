@@ -27,4 +27,9 @@ public class OPeak
         s2n = Double.parseDouble(elementpk.getElementsByTagName("s2n").item(0).getTextContent());
         //type = Double.parseDouble(elementpk.getElementsByTagName("type").item(0).getTextContent());
     }
+    
+    public OPeak()
+    {
+        
+    }
 }

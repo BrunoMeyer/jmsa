@@ -8,6 +8,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Box;
@@ -28,9 +29,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import br.ufpr.bioinfo.jmsa.control.CConfig;
 import br.ufpr.bioinfo.jmsa.control.CControl;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
+import br.ufpr.bioinfo.jmsa.model.SuperPeaklist;
 import br.ufpr.bioinfo.jmsa.model.event.useraction.OUserActionLoadPeakFiles;
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistSimilarity;
 import br.ufpr.bioinfo.jmsa.view.core.PSuperPeaklistPlot;
@@ -242,10 +248,12 @@ public class FMainWindow extends JFrame
 	                	checkBoxMenuItemPlotEnableIntensity.isSelected()
 	                );
 	                panelCluster.reloadDendrogram(peaklists);
-	                panelDBManager.superSpectro.buildPlot(
-		                peaklists,
-		                checkBoxMenuItemPlotEnableIntensity.isSelected()
-		            );
+	                
+	                panelDBManager.reloadClassifier(peaklists);
+//	                panelDBManager.superSpectro.buildPlot(
+//		                peaklists,
+//		                checkBoxMenuItemPlotEnableIntensity.isSelected()
+//		            );
 	                
 	                
 	                List<OPeaklist> mergeDbLoad = new ArrayList<>(dbpeaklists);
@@ -418,9 +426,6 @@ public class FMainWindow extends JFrame
                         
                         updateVisibleColums();
                         
-                        if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFilesDB) {
-                        	panelLoadingPeaklistFilesDB.setMarkersVisibility(false);
-                    	}
                         break;
                     case "config":
                         new FConfig().setVisible(true);
@@ -436,6 +441,7 @@ public class FMainWindow extends JFrame
                         break;
                     case "tab-analyser":
                         tabbedPaneMain.setSelectedComponent(superPeaklistPlot);
+						
                         break;
                     case "tab-cluster":
                         tabbedPaneMain.setSelectedComponent(panelCluster);
@@ -456,7 +462,7 @@ public class FMainWindow extends JFrame
                     	panelDBManager.removeAll();
                     	
                         //panelClassifier.fillTable(peaklists);
-                    	panelDBManager.reloadClassifier(allpeaklists);
+                    	panelDBManager.reloadClassifier(peaklists);
                         break;
                     case "tab-information":
                         tabbedPaneMain.setSelectedComponent(panelInformation);
@@ -596,11 +602,13 @@ public class FMainWindow extends JFrame
     		panelLoadingPeaklistFilesDB.addPeaklistToTable(peaklist);
     		peaklist.selected = true;
     	}
+    	
+    	updateVisibleColums();
     }
     
     public void addPeaklistToLoadingTable(final OPeaklist peaklist)
     {
-    		panelLoadingPeaklistFiles.addPeaklistToTable(peaklist);
+    	panelLoadingPeaklistFiles.addPeaklistToTable(peaklist);
     }
     
     public void removePeaklistFromDBTable(final OPeaklist peaklist)
@@ -643,6 +651,10 @@ public class FMainWindow extends JFrame
         		checkBoxMenuItemShowMSSpecies.isSelected(),
         		checkBoxMenuItemShowMSStrain.isSelected()
         );
+        
+        if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFilesDB) {
+        	panelLoadingPeaklistFilesDB.setMarkersVisibility(false);
+    	}
     }
     
     
