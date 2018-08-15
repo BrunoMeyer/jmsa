@@ -441,7 +441,6 @@ public class FMainWindow extends JFrame
                         break;
                     case "tab-analyser":
                         tabbedPaneMain.setSelectedComponent(superPeaklistPlot);
-						
                         break;
                     case "tab-cluster":
                         tabbedPaneMain.setSelectedComponent(panelCluster);

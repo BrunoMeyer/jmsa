@@ -3,14 +3,14 @@ package br.ufpr.bioinfo.jmsa.model;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.Comparator;
+
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
-
-
 
 // This class contains multiples spectres that was merged
 // All peaks are still saved and this class can be used just like another OPeaklist
@@ -18,6 +18,7 @@ public class SuperPeaklist extends OPeaklist{
 
 	public ArrayList<OPeaklist> peaklists = new ArrayList<OPeaklist>();
 	
+
 	public int distance_merge_peak = 200;
 	
 	public SuperPeaklist(ArrayList<OPeaklist> peaklists) throws ParserConfigurationException, SAXException, IOException{
@@ -48,6 +49,7 @@ public class SuperPeaklist extends OPeaklist{
 			}
 		}
 		
+
 		Collections.sort(newPeaklist, new Comparator<OPeak>() {
 	        @Override
 			public int compare(OPeak p1, OPeak p2)
@@ -85,6 +87,7 @@ public class SuperPeaklist extends OPeaklist{
 //    }
 	
 	
+
 	public void addPeaklist(OPeaklist newPeaklist) {
 		this.peaklists.add(newPeaklist);
 	}
