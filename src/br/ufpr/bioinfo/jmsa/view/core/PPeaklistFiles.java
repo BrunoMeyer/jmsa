@@ -34,6 +34,8 @@ public class PPeaklistFiles extends JPanel
     public JLabel labelStatusBarPeaklistFiles = new JLabel();
     public boolean showMarkers = true;
     public FMainWindow fmain;
+    public boolean globalTrigger = true;
+    
     
     public PPeaklistFiles(String title, FMainWindow fmain)
     {
@@ -91,6 +93,11 @@ public class PPeaklistFiles extends JPanel
     	return newCopie;
     }
     
+    public void setGlobalTrigger(boolean isTrigger) {
+    	this.globalTrigger = isTrigger;
+    	this.defaultTableModel = new PeaklistFilesTableModel(isTrigger);
+    }
+    
     public void clearTable()
     {
         SwingUtilities.invokeLater(new Runnable()
@@ -136,7 +143,7 @@ public class PPeaklistFiles extends JPanel
                 try
                 {
                     defaultTableModel.removeRow(peaklist);
-                    defaultTableModel.fireTableDataChanged();
+                    if(globalTrigger) defaultTableModel.fireTableDataChanged();
                 }
                 catch (Exception e)
                 {

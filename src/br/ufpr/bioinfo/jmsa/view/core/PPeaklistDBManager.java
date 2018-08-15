@@ -55,7 +55,7 @@ public class PPeaklistDBManager extends JPanel
     //
     private List<OPeaklist> peaklists;
     private List<OPeaklist> loadingPeakLists;
-    JComboBox selectField;
+    private JComboBox selectField;
     
     public List<OPeaklist> DBPeaks;
     public FMainWindow fmain;
@@ -88,7 +88,6 @@ public class PPeaklistDBManager extends JPanel
             	try {
 					SuperPeaklist merged = new SuperPeaklist((ArrayList)peaklists);
 					fmain.addPeaklistToTable(merged);
-					System.out.println(merged.getPeaks().size());
 				} catch (ParserConfigurationException | SAXException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -240,13 +239,14 @@ public class PPeaklistDBManager extends JPanel
    
     public void reloadClassifier(List<OPeaklist> peaklists){
     	this.peaklists = peaklists;
-//    	PPeaklistFiles newList = fmain.panelLoadingPeaklistFiles.clone();
-////    	newList.setMarkersVisibility(false);
-//    	newList.defaultTableModel.addTableModelListener(new TableModelListener()
-//        {
-//            @Override
-//            public void tableChanged(TableModelEvent e)
-//            {
+    	PPeaklistFiles newList = fmain.panelLoadingPeaklistFilesDB.clone();
+    	newList.setMarkersVisibility(false);
+    	newList.setGlobalTrigger(false);
+    	newList.defaultTableModel.addTableModelListener(new TableModelListener()
+        {
+            @Override
+            public void tableChanged(TableModelEvent e)
+            {
 //
 //                int rowIndex = newList.table.getSelectedRow();
 //                int colIndex = newList.table.getSelectedColumn();
@@ -260,29 +260,20 @@ public class PPeaklistDBManager extends JPanel
 //                	);
 //                	revalidate();
 //                }
-//                
-////                int prevTab = FMainWindow.getInstance().tabbedPaneMain.getSelectedIndex();
-////                FMainWindow.getInstance().tabbedPaneMain.setSelectedIndex(-1);
-////                FMainWindow.getInstance().tabbedPaneMain.setSelectedIndex(prevTab);
-////                //
-////                prevTab = FMainWindow.getInstance().tabbedPanePeaklist.getSelectedIndex();
-////                FMainWindow.getInstance().tabbedPanePeaklist.setSelectedIndex(-1);
-////                FMainWindow.getInstance().tabbedPanePeaklist.setSelectedIndex(prevTab);
-////                //
-////                labelStatusBarPeaklistFiles.setText(defaultTableModel.getSelectedPeaklists().size() + "/" + defaultTableModel.getRowCount());
-//            }
-//        });
+//        
+            }
+        });
     	myContent.removeAll();
     	JPanel topPanel = new JPanel();
     	topPanel.setLayout(new GridLayout(1, 2));
     	
-    	JLabel teste = new JLabel("Teste");
+//    	JLabel teste = new JLabel("Teste");
     	JPanel topRightPanel = new JPanel();
-    	topRightPanel.add(teste);
+//    	topRightPanel.add(teste);
     	topRightPanel.add(buttonMerge);
     	
     	topPanel.add(topRightPanel);
-//    	topPanel.add(newList);
+    	topPanel.add(newList);
     	this.superSpectro.setLayout(new GridLayout(1, 0));
     	this.superSpectro.buildPlot(
     		peaklists,
@@ -296,6 +287,7 @@ public class PPeaklistDBManager extends JPanel
     	
     	scrollPanePeaklistFiles.setViewportView(myContent);
     	add(scrollPanePeaklistFiles, BorderLayout.CENTER);
+    	
     	
         revalidate();
     	

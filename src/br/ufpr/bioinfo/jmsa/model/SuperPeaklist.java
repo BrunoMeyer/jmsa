@@ -3,10 +3,13 @@ package br.ufpr.bioinfo.jmsa.model;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
+
 
 
 // This class contains multiples spectres that was merged
@@ -14,6 +17,8 @@ import org.xml.sax.SAXException;
 public class SuperPeaklist extends OPeaklist{
 
 	public ArrayList<OPeaklist> peaklists = new ArrayList<OPeaklist>();
+	
+	public int distance_merge_peak = 200;
 	
 	public SuperPeaklist(ArrayList<OPeaklist> peaklists) throws ParserConfigurationException, SAXException, IOException{
 		super(peaklists.get(0).peaklistFile);
@@ -43,8 +48,41 @@ public class SuperPeaklist extends OPeaklist{
 			}
 		}
 		
-		return newPeaklist;
+		Collections.sort(newPeaklist, new Comparator<OPeak>() {
+	        @Override
+			public int compare(OPeak p1, OPeak p2)
+	        {
+	        	Double result = new Double(p1.mass - p2.mass);
+	            return result.intValue();
+	        }
+	    });
+		
+		ArrayList<OPeak> newPeaklistMerged = new ArrayList<OPeak>(); 
+		int i = 0;
+		for (OPeak peak : newPeaklist){
+			if(i+1 < newPeaklist.size() && newPeaklist.get(i+1).mass - peak.mass > distance_merge_peak) {
+				newPeaklistMerged.add(peak);
+			}
+			i++;
+		}
+		
+		return newPeaklistMerged;
     }
+	
+	
+//	@Override
+//	public ArrayList<OPeak> getPeaks() {
+//		ArrayList<OPeak> newPeaklist = new ArrayList<OPeak>();
+//		for (OPeaklist peaklist : this.peaklists){
+//			
+//			for (OPeak peak : peaklist.getPeaks()){
+////				OPeak newPeak = new OPeak();
+//				newPeaklist.add(peak);
+//			}
+//		}
+//		
+//		return newPeaklist;
+//    }
 	
 	
 	public void addPeaklist(OPeaklist newPeaklist) {
