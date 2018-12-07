@@ -25,13 +25,16 @@ public class SuperPeaklist extends OPeaklist{
 		super(peaklists.get(0).peaklistFile);
 		ArrayList<OPeaklist> clone = (ArrayList<OPeaklist>) peaklists.clone();
 		this.peaklists = clone;
+		this.spectrumid = "SE-"+this.spectrumid;
 	}
 	// Constructors
 	public SuperPeaklist(File peaklistFile) throws ParserConfigurationException, SAXException, IOException {
 		super(peaklistFile);
 	}
 	
-	
+	public void setDistanceMergePeak(int newDistance) {
+		this.distance_merge_peak = newDistance;
+	}
 
 	
 	//Override methods from OPeaklist class
@@ -62,9 +65,12 @@ public class SuperPeaklist extends OPeaklist{
 		ArrayList<OPeak> newPeaklistMerged = new ArrayList<OPeak>(); 
 		int i = 0;
 		for (OPeak peak : newPeaklist){
-			if(i+1 < newPeaklist.size() && newPeaklist.get(i+1).mass - peak.mass > distance_merge_peak) {
-				newPeaklistMerged.add(peak);
+			if(i+1 < newPeaklist.size() && newPeaklist.get(i+1).mass - peak.mass <= distance_merge_peak) {
+				i++;
+				continue;
 			}
+
+			newPeaklistMerged.add(peak);
 			i++;
 		}
 		

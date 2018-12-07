@@ -24,6 +24,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -61,6 +62,8 @@ public class PPeaklistDBManager extends JPanel
     public FMainWindow fmain;
     private NameNumber[] distances;
     
+    private JSpinner spinner;
+    
     public PSuperPeaklistPlot superSpectro = new PSuperPeaklistPlot();
     public PPeaklistDBManager(FMainWindow fmain)
     {
@@ -87,6 +90,7 @@ public class PPeaklistDBManager extends JPanel
             public void actionPerformed(ActionEvent e) {
             	try {
 					SuperPeaklist merged = new SuperPeaklist((ArrayList)peaklists);
+					merged.setDistanceMergePeak((int)spinner.getValue());
 					fmain.addPeaklistToTable(merged);
 				} catch (ParserConfigurationException | SAXException | IOException e1) {
 					// TODO Auto-generated catch block
@@ -268,11 +272,15 @@ public class PPeaklistDBManager extends JPanel
     	topPanel.setLayout(new GridLayout(1, 2));
     	
 //    	JLabel teste = new JLabel("Teste");
-    	JPanel topRightPanel = new JPanel();
+    	JPanel topLeftPanel = new JPanel();
 //    	topRightPanel.add(teste);
-    	topRightPanel.add(buttonMerge);
     	
-    	topPanel.add(topRightPanel);
+    	spinner = new JSpinner();
+    	spinner.setValue(200);
+    	topLeftPanel.add(buttonMerge);
+    	topLeftPanel.add(spinner);
+    	
+    	topPanel.add(topLeftPanel);
     	topPanel.add(newList);
     	this.superSpectro.setLayout(new GridLayout(1, 0));
     	this.superSpectro.buildPlot(
