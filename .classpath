@@ -20,5 +20,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/jmsa/libs/miglayout-core-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/home/bhm15/Downloads/json-simple-1.1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

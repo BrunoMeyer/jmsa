@@ -6,11 +6,23 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -27,14 +39,17 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
 import br.ufpr.bioinfo.jmsa.control.CConfig;
 import br.ufpr.bioinfo.jmsa.control.CControl;
+import br.ufpr.bioinfo.jmsa.model.OPeak;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
 import br.ufpr.bioinfo.jmsa.model.SuperPeaklist;
 import br.ufpr.bioinfo.jmsa.model.event.useraction.OUserActionLoadPeakFiles;
@@ -47,6 +62,12 @@ import br.ufpr.bioinfo.jmsa.view.core.PPeaklistDendrogram;
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistFiles;
 import br.ufpr.bioinfo.jmsa.view.core.SIconUtil;
 
+
+
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 public class FMainWindow extends JFrame
 {
@@ -102,7 +123,11 @@ public class FMainWindow extends JFrame
     
     public JToolBar toolBar = new JToolBar("Tools");
     public JLabel labelStatusBar = new JLabel("JMSA");
+    
     public JButton buttonLoadFiles = new JButton("Load");
+    public JButton buttonSaveDB = new JButton("Save Database");
+    public JButton buttonLoadDB = new JButton("Load Database");
+    
     public JButton buttonPeaklist = new JButton("Peaklist");
     public JButton buttonAnalyser = new JButton("Analyser");
     public JButton buttonCluster = new JButton("Cluster");
@@ -172,6 +197,8 @@ public class FMainWindow extends JFrame
         add(splitPane, BorderLayout.CENTER);
         add(panelStatusBar, BorderLayout.SOUTH);
         toolBar.add(buttonLoadFiles);
+        toolBar.add(buttonSaveDB);
+        toolBar.add(buttonLoadDB);
         toolBar.add(buttonPeaklist);
         toolBar.add(buttonAnalyser);
         toolBar.add(buttonCluster);
@@ -356,7 +383,10 @@ public class FMainWindow extends JFrame
             	List<OPeaklist> peaklists = panelLoadingPeaklistFiles.defaultTableModel.getSelectedPeaklists();
             	List<OPeaklist> dbpeaklists = panelLoadingPeaklistFilesDB.defaultTableModel.getSelectedPeaklists();
             	List<OPeaklist> allpeaklists = panelLoadingPeaklistFiles.defaultTableModel.getAllPeaklists();
-                
+            	JFileChooser chooserSave;
+            	int retrival;
+            	FileNameExtensionFilter filter;
+
             	switch (e.getActionCommand())
                 {
                     case "ShowMSName":
@@ -427,6 +457,52 @@ public class FMainWindow extends JFrame
                         updateVisibleColums();
                         
                         break;
+                    case "savedb":
+                    	// Open the file selector interface
+                    	chooserSave = new JFileChooser();
+                    	chooserSave.setCurrentDirectory(
+                    		new File(CConfig.getInstance().loadingPath)
+                    	);
+                    	filter = new FileNameExtensionFilter(null, "zip");
+                    	chooserSave.setFileFilter(filter);
+                        chooserSave.setSelectedFile(new File("database_name.jmsadb.zip"));
+
+                    	retrival = chooserSave.showSaveDialog(null);
+                        
+                        if (retrival == JFileChooser.APPROVE_OPTION) {
+                        	// When the user choose a file name and directory to save
+                            try {
+                            	// Get the name of file choosed by user
+                            	String file_name_to_save = chooserSave.getSelectedFile().toString();
+
+                            	saveDB(file_name_to_save);
+                            } catch (Exception err){
+                        		err.printStackTrace();
+                            }
+                        }  
+                        break;
+                    case "loaddb":
+
+                    	// Open the file selector interface
+                    	chooserSave = new JFileChooser();
+                    	chooserSave.setCurrentDirectory(
+                    		new File(CConfig.getInstance().loadingPath)
+                    	);
+                    	filter = new FileNameExtensionFilter(null, "zip");
+                    	chooserSave.setFileFilter(filter);
+                        
+                        if (chooserSave.showOpenDialog(FMainWindow.this) == JFileChooser.APPROVE_OPTION) {
+                        	// When the user choose a file name and directory to save
+                            try {
+                            	// Get the name of file choosed by user
+                            	String file_name_to_save = chooserSave.getSelectedFile().toString();
+
+                            	loadDB(file_name_to_save);
+                            } catch (Exception err){
+                        		err.printStackTrace();
+                            }
+                        }
+                        break;
                     case "config":
                         new FConfig().setVisible(true);
                         break;
@@ -446,7 +522,6 @@ public class FMainWindow extends JFrame
                         tabbedPaneMain.setSelectedComponent(panelCluster);
                         panelCluster.removeAll();
                         panelCluster.reloadDendrogram(peaklists);
-                    	
                         break;
                     case "tab-db-search":
                     	dbpeaklists.addAll(peaklists);
@@ -486,13 +561,15 @@ public class FMainWindow extends JFrame
                     
                     case "export-csv":
                     	String tableText = (similarityMatrix.csvTable());
-                    	JFileChooser chooserSave = new JFileChooser();
-                    	chooserSave.setCurrentDirectory(new File("/home/me/Documents"));
-                        int retrival = chooserSave.showSaveDialog(null);
+                    	chooserSave = new JFileChooser();
+                    	chooserSave.setCurrentDirectory(
+                    		new File(CConfig.getInstance().loadingPath)
+                    	);
+                    	chooserSave.setSelectedFile(new File("table_name.csv"));
+                        retrival = chooserSave.showSaveDialog(null);
                         if (retrival == JFileChooser.APPROVE_OPTION) {
                             try {
-                            	CControl.getInstance().threadUserActionsPool.addEvento(new OUserActionLoadPeakFiles(chooserSave.getSelectedFiles()));
-                                FileWriter fw = new FileWriter(chooserSave.getSelectedFile()+".csv");
+                            	FileWriter fw = new FileWriter(chooserSave.getSelectedFile().toString());
                                 fw.write(tableText);
                                 fw.close();
                             } catch (Exception ex) {
@@ -534,6 +611,8 @@ public class FMainWindow extends JFrame
         menuItemExit.setActionCommand("exit");
         menuItemAbout.setActionCommand("about");
         buttonLoadFiles.setActionCommand("loadpeakfiles");
+        buttonSaveDB.setActionCommand("savedb");
+        buttonLoadDB.setActionCommand("loaddb");
         buttonPeaklist.setActionCommand("tab-peaklist");
         buttonAnalyser.setActionCommand("tab-analyser");
         buttonCluster.setActionCommand("tab-cluster");
@@ -549,6 +628,8 @@ public class FMainWindow extends JFrame
         menuItemExit.addActionListener(actionListener);
         menuItemAbout.addActionListener(actionListener);
         buttonLoadFiles.addActionListener(actionListener);
+        buttonSaveDB.addActionListener(actionListener);
+        buttonLoadDB.addActionListener(actionListener);
         buttonPeaklist.addActionListener(actionListener);
         buttonAnalyser.addActionListener(actionListener);
         buttonCluster.addActionListener(actionListener);
@@ -601,8 +682,8 @@ public class FMainWindow extends JFrame
     		panelLoadingPeaklistFilesDB.addPeaklistToTable(peaklist);
     		peaklist.selected = true;
     	}
-    	
     	updateVisibleColums();
+    	panelLoadingPeaklistFilesDB.defaultTableModel.fireTableDataChanged();
     }
     
     public void addPeaklistToLoadingTable(final OPeaklist peaklist)
@@ -616,7 +697,6 @@ public class FMainWindow extends JFrame
     }
     
     public boolean isInDB(final OPeaklist peaklist) {
-    	boolean isIn = false;
     	List<OPeaklist> peaklists = panelLoadingPeaklistFilesDB.defaultTableModel.getSelectedPeaklists();
     	for(OPeaklist p : peaklists ) {
     		if(p == peaklist)
@@ -627,7 +707,6 @@ public class FMainWindow extends JFrame
     }
     
     public boolean isInLoad(final OPeaklist peaklist) {
-    	boolean isIn = false;
     	List<OPeaklist> peaklists = panelLoadingPeaklistFiles.defaultTableModel.getSelectedPeaklists();
     	for(OPeaklist p : peaklists ) {
     		if(p == peaklist)
@@ -637,6 +716,24 @@ public class FMainWindow extends JFrame
     	return false;
     }
     
+    public List<OPeaklist> getSelectedPanelPeaks(){
+    	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFiles) {
+    		return panelLoadingPeaklistFiles.defaultTableModel.getAllPeaklists();
+    	}
+    	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFilesDB) {
+    		return panelLoadingPeaklistFilesDB.defaultTableModel.getAllPeaklists();
+    	}
+    	
+    	return null;
+    }
+    
+    public OPeaklist getSelectedPanelPeakById(String id) {
+    	List<OPeaklist> peaklists = this.getSelectedPanelPeaks();
+    	for(OPeaklist p : peaklists ) {
+    		if(p.toString().equals(id)) return p;
+    	}
+    	return null;
+    }
     public void updateVisibleColums() {
     	panelLoadingPeaklistFiles.setVisibleColumns(
         		checkBoxMenuItemShowMSName.isSelected(),
@@ -654,6 +751,234 @@ public class FMainWindow extends JFrame
         if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFilesDB) {
         	panelLoadingPeaklistFilesDB.setMarkersVisibility(false);
     	}
+    }
+    
+    
+    public void saveDB(String path_to_save) {
+    	// IMPORTANT: Any modification in this method
+    	// can cause an incompatibility of versions on this program
+    	// Please, do not change the file names created
+    	
+    	try {
+	    	List<OPeaklist> peaklists = panelLoadingPeaklistFiles.defaultTableModel.getSelectedPeaklists();
+	    	
+	    	String zipFile = path_to_save;
+			
+			// Instance a zip file
+			FileOutputStream fos = new FileOutputStream(zipFile);
+			ZipOutputStream zos = new ZipOutputStream(fos);
+			
+			
+			// Instance variables that will be used for create an zip file
+			// that represent the database 
+			byte[] buffer = new byte[1024];
+			FileInputStream in;
+			ZipEntry ze;
+			int len;
+			
+			// An json file named peaklistJMSA.json will be created
+			// and that contains the listing of peaklists files and superespectres
+			
+			// Array on format like: [
+			//	{"id":"idspectre1", "path":"files/idspectre1.xml"},
+			//	...
+			// ]
+			
+			JSONArray peaklists_json_array = new JSONArray();
+			
+			// Array on format like: [
+			// 	{"id":"SE-superspectre1", "peaklists_ids":["superspectre1","superspectre2", ...]},
+			// 	...
+			// ]
+			JSONArray superpeaks_json_array = new JSONArray();
+			
+			// For each peaklist selected, save it on "files/peaklistid.xml" inside zip file
+			// If the peaklist instance was an superspectre, just add it on json file
+			for (OPeaklist peaklist : peaklists){
+				if(peaklist instanceof SuperPeaklist) {
+					SuperPeaklist sp = (SuperPeaklist) peaklist;
+					JSONObject super_peak_obj = new JSONObject();
+					JSONArray sp_peaklists_json_array = new JSONArray();
+					
+					for (OPeaklist sp_peaklist : sp.peaklists){
+						sp_peaklists_json_array.add(sp_peaklist.toString());
+					}
+					super_peak_obj.put("id", sp.toString());
+					super_peak_obj.put("peaklists_ids", sp_peaklists_json_array);
+					super_peak_obj.put("distance_merge_peak", sp.distance_merge_peak);
+					superpeaks_json_array.add(super_peak_obj);
+				}
+				else {
+	    			String file_name = peaklist.peaklistFile.toString();
+	    			String file_path = 
+	    					"files"+File.separator+peaklist.toString()+File.separator+"peaklist.xml";
+	    			ze = new ZipEntry(file_path);
+	    			zos.putNextEntry(ze);
+	    			
+	    			JSONObject peak_obj = new JSONObject();
+	        		peak_obj.put("id", peaklist.toString());
+	        		peak_obj.put("path", file_path);
+	        		peaklists_json_array.add(peak_obj);
+	    			in = new FileInputStream(file_name);
+	    			
+	    			// This is needed to create the zip file
+	    			// The size of buffer defined before can be a future problem
+	    			while ((len = in.read(buffer)) > 0) {
+	    				zos.write(buffer, 0, len);
+	    			}
+	    			in.close();
+				}
+			}
+			
+	
+			// Create an temporary file for json
+			// This can be an problem on windows or different OS systems
+			String tempFileName = "peaklistJMSA.json";
+			File tempFile = File.createTempFile(tempFileName+".", ".temp");
+			                    		
+			JSONObject obj = new JSONObject();
+			obj.put("peaklists", peaklists_json_array);
+			obj.put("super_peaklists", superpeaks_json_array);
+			
+			try {
+				BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
+	    	    bw.write(obj.toJSONString());
+	    	    bw.close();
+			} catch(IOException err){
+				err.printStackTrace();
+			}
+			
+			// Finally, save the json inside zip file
+			ze = new ZipEntry(tempFileName);
+			zos.putNextEntry(ze);
+			in = new FileInputStream(tempFile.getAbsoluteFile());
+			while ((len = in.read(buffer)) > 0) {
+				zos.write(buffer, 0, len);
+			}
+			in.close();
+			
+			obj.put("peaklists", peaklists_json_array);
+			tempFile.deleteOnExit();
+			
+			zos.closeEntry();
+			zos.close();
+    	} catch (Exception err){
+    		err.printStackTrace();
+        }
+    }
+    public static File createTempDirectory() throws IOException {
+	    final File temp;
+
+	    temp = File.createTempFile("temp", Long.toString(System.nanoTime()));
+
+	    if(!(temp.delete()))
+	    {
+	        throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
+	    }
+
+	    if(!(temp.mkdir()))
+	    {
+	        throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
+	    }
+
+	    return (temp);
+	}
+
+    public void loadDB(String zipFilePath) throws IOException, ParseException {
+    	
+    	String tempDirName = "jmsa_temp_load";
+		File dir = createTempDirectory();
+		String destDir = dir.getAbsolutePath();
+        // create output directory if it doesn't exist
+        if(!dir.exists()) dir.mkdirs();
+        FileInputStream fis;
+        
+        JSONParser parser = new JSONParser();
+        
+        JSONObject peaklistJSON;
+
+        // buffer for read and write data to file
+        byte[] buffer = new byte[1024];
+        try {
+            fis = new FileInputStream(zipFilePath);
+            ZipInputStream zis = new ZipInputStream(fis);
+            ZipEntry ze = zis.getNextEntry();
+            JSONArray super_peaks_file = null;
+            
+            while(ze != null){
+                String fileName = ze.getName();
+                
+                File newFile = new File(destDir + File.separator + fileName);
+                
+                // create directories for sub directories in zip
+                new File(newFile.getParent()).mkdirs();
+                FileOutputStream fos = new FileOutputStream(newFile);
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                	fos.write(buffer, 0, len);
+                }
+                if(fileName.equals("peaklistJMSA.json")) {
+                	Object obj = parser.parse(new FileReader(newFile.getAbsolutePath()));
+
+                    JSONObject json_object = (JSONObject) obj;
+                    super_peaks_file = (JSONArray) json_object.get("super_peaklists");
+                }
+
+                fos.close();
+                // close this ZipEntry
+                zis.closeEntry();
+                ze = zis.getNextEntry();
+            }
+            // close last ZipEntry
+            zis.closeEntry();
+            zis.close();
+            fis.close();
+            final JSONArray super_peaks = super_peaks_file;
+            OUserActionLoadPeakFiles peaksLoader = new OUserActionLoadPeakFiles(
+        		new File[] {dir}
+            );
+            peaksLoader.executarEvento();
+            updateVisibleColums();
+            
+            
+            SwingUtilities.invokeLater(new Runnable()
+            {
+                public void run()
+                {
+                	if(super_peaks != null) {
+        	            Iterator<JSONObject> iterator_super_spectres = super_peaks.iterator();
+        	            while (iterator_super_spectres.hasNext()) {
+        	            	JSONObject sp = iterator_super_spectres.next();
+        	            	JSONArray peaklists_id = (JSONArray) sp.get("peaklists_ids");
+        	            	int distance_merge_peak = (int) (long) sp.get("distance_merge_peak");
+        	            	
+        		            Iterator<String> iterator_peaklists_id_ = peaklists_id.iterator();
+        		            List<OPeaklist> peaklists = new ArrayList();
+        		            while (iterator_peaklists_id_.hasNext()) {
+        		            	String p_id = iterator_peaklists_id_.next();
+        		            	OPeaklist p = FMainWindow.getInstance().getSelectedPanelPeakById(
+        		            		p_id
+        		            	);
+        		            	
+        		            	peaklists.add(p);
+        		            }
+        		            
+        		            try {
+        						SuperPeaklist merged = new SuperPeaklist((ArrayList)peaklists);
+        						merged.setDistanceMergePeak(distance_merge_peak);
+        						FMainWindow.getInstance().addPeaklistToTable(merged);
+        					} catch (ParserConfigurationException | SAXException | IOException e1) {
+        						// TODO Auto-generated catch block
+        						e1.printStackTrace();
+        					}
+        	            }
+                    }
+                }
+            });
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     

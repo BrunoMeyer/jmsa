@@ -17,7 +17,6 @@ import org.xml.sax.SAXException;
 public class SuperPeaklist extends OPeaklist{
 
 	public ArrayList<OPeaklist> peaklists = new ArrayList<OPeaklist>();
-	
 
 	public int distance_merge_peak = 200;
 	

@@ -161,7 +161,6 @@ public class PPeaklistDBManager extends JPanel
     	distances = new NameNumber[peaklists.size()];
     	
     	
-    	
         int selected = selectField.getSelectedIndex();
         
        

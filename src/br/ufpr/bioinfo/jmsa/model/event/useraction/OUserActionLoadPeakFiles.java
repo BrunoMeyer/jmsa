@@ -32,7 +32,7 @@ public class OUserActionLoadPeakFiles implements OEvento
         //        System.out.println("Iniciando o Loading: " + start);
         //
         //
-        //TODO MALTON: Não utilizar JOptionPane pois pode causar uma inconsistência. Criar um JDialog personalizado
+        //TODO MALTON: Nao utilizar JOptionPane pois pode causar uma inconsistencia. Criar um JDialog personalizado
         Object[] options = { "Cancel" };
         final JOptionPane pane = new JOptionPane("Loading Peaklists", JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, options);
         final JProgressBar progressBar = new JProgressBar(0, 0);
@@ -62,7 +62,7 @@ public class OUserActionLoadPeakFiles implements OEvento
                 {
                     e.printStackTrace();
                 }
-                dialog.setVisible(true);
+                dialog.setVisible(false);
             }
         });
         //
