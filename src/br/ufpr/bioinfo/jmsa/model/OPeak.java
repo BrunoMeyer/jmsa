@@ -27,7 +27,44 @@ public class OPeak
         s2n = Double.parseDouble(elementpk.getElementsByTagName("s2n").item(0).getTextContent());
         //type = Double.parseDouble(elementpk.getElementsByTagName("type").item(0).getTextContent());
     }
+    public OPeak(OPeak opeak)
+    {
+        absi = opeak.absi;
+        area = opeak.area;
+        ind = opeak.ind;
+        ind = opeak.lind;
+        mass = opeak.mass;
+        meth = opeak.meth;
+        reso = opeak.reso;
+        rind = opeak.rind;
+        s2n = opeak.s2n;
+        type = opeak.type;
+    }
     
+    public void add(OPeak opeak)
+    {
+        absi += opeak.absi;
+        area += opeak.area;
+        ind += opeak.ind;
+        ind += opeak.lind;
+        mass += opeak.mass;
+        meth += opeak.meth;
+        reso += opeak.reso;
+        rind += opeak.rind;
+        s2n += opeak.s2n;
+    }
+    
+    public void divide(double factor) {
+    	absi /= factor;
+        area /= factor;
+        ind /= factor;
+        ind /= factor;
+        mass /= factor;
+        meth /= factor;
+        reso /= factor;
+        rind /= factor;
+        s2n /= factor;
+    }
     public OPeak()
     {
         

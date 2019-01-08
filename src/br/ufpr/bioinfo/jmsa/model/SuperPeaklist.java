@@ -2,6 +2,7 @@ package br.ufpr.bioinfo.jmsa.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import java.util.Collections;
@@ -24,7 +25,11 @@ public class SuperPeaklist extends OPeaklist{
 		super(peaklists.get(0).peaklistFile);
 		ArrayList<OPeaklist> clone = (ArrayList<OPeaklist>) peaklists.clone();
 		this.peaklists = clone;
-		this.spectrumid = "SE-"+this.spectrumid;
+		
+		DecimalFormat decimalFormat = new DecimalFormat("#");
+		String threadId = decimalFormat.format(Thread.currentThread().getId());
+		String time = decimalFormat.format(System.currentTimeMillis());
+		this.spectrumid = "SE-"+time+threadId;
 	}
 	// Constructors
 	public SuperPeaklist(File peaklistFile) throws ParserConfigurationException, SAXException, IOException {
@@ -61,15 +66,30 @@ public class SuperPeaklist extends OPeaklist{
 	        }
 	    });
 		
+		// The new instance of OPeak have all attributes set into 0
+		OPeak sum = new OPeak();
+		int count = 0;
+		
 		ArrayList<OPeak> newPeaklistMerged = new ArrayList<OPeak>(); 
 		int i = 0;
 		for (OPeak peak : newPeaklist){
+			// Sum the peak to the aux variable sum
+			sum.add(peak);
+			count ++;
 			if(i+1 < newPeaklist.size() && newPeaklist.get(i+1).mass - peak.mass <= distance_merge_peak) {
 				i++;
 				continue;
 			}
-
-			newPeaklistMerged.add(peak);
+			
+			// Get average from closest peaks
+			sum.divide(count);
+			
+			newPeaklistMerged.add(sum);
+			
+			// Restart variables used to compute the average peak
+			count = 0;
+			sum = new OPeak();
+			
 			i++;
 		}
 		

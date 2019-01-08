@@ -125,8 +125,8 @@ public class FMainWindow extends JFrame
     public JLabel labelStatusBar = new JLabel("JMSA");
     
     public JButton buttonLoadFiles = new JButton("Load");
-    public JButton buttonSaveDB = new JButton("Save Database");
-    public JButton buttonLoadDB = new JButton("Load Database");
+    public JButton buttonSaveDB = new JButton("Save to ZIP");
+    public JButton buttonLoadDB = new JButton("Load from ZIP");
     
     public JButton buttonPeaklist = new JButton("Peaklist");
     public JButton buttonAnalyser = new JButton("Analyser");
@@ -950,6 +950,8 @@ public class FMainWindow extends JFrame
         	            while (iterator_super_spectres.hasNext()) {
         	            	JSONObject sp = iterator_super_spectres.next();
         	            	JSONArray peaklists_id = (JSONArray) sp.get("peaklists_ids");
+        	            	String sp_id = (String) sp.get("id");
+        	            	
         	            	int distance_merge_peak = (int) (long) sp.get("distance_merge_peak");
         	            	
         		            Iterator<String> iterator_peaklists_id_ = peaklists_id.iterator();
@@ -965,6 +967,7 @@ public class FMainWindow extends JFrame
         		            
         		            try {
         						SuperPeaklist merged = new SuperPeaklist((ArrayList)peaklists);
+        						merged.spectrumid = sp_id;
         						merged.setDistanceMergePeak(distance_merge_peak);
         						FMainWindow.getInstance().addPeaklistToTable(merged);
         					} catch (ParserConfigurationException | SAXException | IOException e1) {
