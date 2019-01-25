@@ -219,9 +219,7 @@ public class PPeaklistClassifier extends JPanel
         
     }
     
-    
-    public void reloadClassifier(List<OPeaklist> newLoadingPeakLists, List<OPeaklist> newPeaklists){
-    	
+    public void reloadScrollPeakList(List<OPeaklist> newLoadingPeakLists, List<OPeaklist> newPeaklists) {
     	if(newPeaklists.size() <= 0)
     		return;
     	
@@ -235,9 +233,18 @@ public class PPeaklistClassifier extends JPanel
     	
     	
     	add(scrollPanePeaklistFiles, BorderLayout.CENTER);
+    }
+    public void reloadClassifier(List<OPeaklist> newLoadingPeakLists, List<OPeaklist> newPeaklists){
     	
+    	if(newPeaklists.size() <= 0)
+    		return;
+    	
+    	if(newPeaklists != null) {
+    		peaklists = newPeaklists;
+    		loadingPeakLists = newLoadingPeakLists;
+    	}
         
-        
+    	reloadScrollPeakList(newLoadingPeakLists, newPeaklists);
     	
         NameNumber[] distances = new NameNumber[peaklists.size()];
 

@@ -49,22 +49,14 @@ public class OUserActionLoadPeakFiles implements OEvento
         //
         //
         //
-        SwingUtilities.invokeLater(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                try
-                {
-                    Thread.sleep(100);
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
-                dialog.setVisible(false);
-            }
-        });
+
+        new Thread(new Runnable() {
+        	@Override
+	        public void run() {
+        		dialog.setVisible(true);
+	        }
+        }).start();
+        
         //
         try
         {
@@ -84,7 +76,7 @@ public class OUserActionLoadPeakFiles implements OEvento
                     {
                         if (!file.isDirectory())
                         {
-                            if (file.getName().endsWith("xml") || file.getName().toLowerCase().endsWith("peaks"))
+                            if (file.getName().endsWith("peaklist.xml") || file.getName().toLowerCase().endsWith("peaks"))
                             {
                                 foundPeakFiles.add(file);
                             }
@@ -150,6 +142,7 @@ public class OUserActionLoadPeakFiles implements OEvento
         {
             dialog.dispose();
         }
+        FMainWindow.getInstance().lockUpdatePanels = false;
         System.out.println("Finalizando o Loading: " + (System.currentTimeMillis() - start));
     }
 }

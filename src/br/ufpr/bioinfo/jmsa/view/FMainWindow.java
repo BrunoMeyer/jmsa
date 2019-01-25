@@ -140,6 +140,8 @@ public class FMainWindow extends JFrame
     
     public PPeaklistSimilarity similarityMatrix;
     
+    public boolean lockUpdatePanels = false;
+    
     public static FMainWindow getInstance()
     {
         if (myself == null)
@@ -267,32 +269,42 @@ public class FMainWindow extends JFrame
             {
             	try
                 {
+            		if(lockUpdatePanels) return;
+            		System.out.println(lockUpdatePanels);
             		List<OPeaklist> dbpeaklists = panelLoadingPeaklistFilesDB.defaultTableModel.getSelectedPeaklists();
 	            	List<OPeaklist> peaklists = panelLoadingPeaklistFiles.defaultTableModel.getSelectedPeaklists();
 	               
-	            	superPeaklistPlot.buildPlot(
-	                	peaklists,
-	                	checkBoxMenuItemPlotEnableIntensity.isSelected()
-	                );
-	                panelCluster.reloadDendrogram(peaklists);
+	            	if(tabbedPaneMain.getSelectedComponent() == superPeaklistPlot) {
+            			superPeaklistPlot.buildPlot(
+    	                	peaklists,
+    	                	checkBoxMenuItemPlotEnableIntensity.isSelected()
+    	                );
+	            	}
+	            	if(tabbedPaneMain.getSelectedComponent() == panelCluster) {
+	            		panelCluster.reloadDendrogram(peaklists);
+	            	}
+	            	if(tabbedPaneMain.getSelectedComponent() == panelDBManager) {
+	            		panelDBManager.reloadClassifier(peaklists);
+	            	}
+	            	if(tabbedPaneMain.getSelectedComponent() == panelClassifier) {
+            			
+	            	}
+	            	if(tabbedPaneMain.getSelectedComponent() == panelCluster) {
+	            		List<OPeaklist> mergeDbLoad = new ArrayList<>(dbpeaklists);
+		                for(OPeaklist pk : peaklists) {
+		                	if( !isInDB(pk) ) {
+		                		mergeDbLoad.add(pk);
+		                	}
+		                }
+		                
+	                    panelClassifier.reloadScrollPeakList(peaklists,mergeDbLoad);
+	            	}
 	                
-	                panelDBManager.reloadClassifier(peaklists);
 //	                panelDBManager.superSpectro.buildPlot(
 //		                peaklists,
 //		                checkBoxMenuItemPlotEnableIntensity.isSelected()
 //		            );
 	                
-	                
-	                List<OPeaklist> mergeDbLoad = new ArrayList<>(dbpeaklists);
-	                for(OPeaklist pk : peaklists) {
-	                	if( !isInDB(pk) ) {
-	                		mergeDbLoad.add(pk);
-	                	}
-	                }
-	                
-                    panelClassifier.reloadClassifier(peaklists,mergeDbLoad);
-                    
-                    
                 }
             	catch (Exception err)
                 {
@@ -449,9 +461,16 @@ public class FMainWindow extends JFrame
                         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                         chooser.setMultiSelectionEnabled(true);
                         chooser.setAcceptAllFileFilterUsed(false);
+                        
+                        if(lockUpdatePanels) break;
+                        
+                        lockUpdatePanels = true;
                         if (chooser.showOpenDialog(FMainWindow.this) == JFileChooser.APPROVE_OPTION)
                         {
                             CControl.getInstance().threadUserActionsPool.addEvento(new OUserActionLoadPeakFiles(chooser.getSelectedFiles()));
+                        }
+                        else {
+                        	lockUpdatePanels = false;
                         }
                         
                         updateVisibleColums();
@@ -490,7 +509,10 @@ public class FMainWindow extends JFrame
                     	);
                     	filter = new FileNameExtensionFilter(null, "zip");
                     	chooserSave.setFileFilter(filter);
+                    	
+                    	if(lockUpdatePanels) break;
                         
+                        lockUpdatePanels = true;
                         if (chooserSave.showOpenDialog(FMainWindow.this) == JFileChooser.APPROVE_OPTION) {
                         	// When the user choose a file name and directory to save
                             try {
@@ -501,6 +523,9 @@ public class FMainWindow extends JFrame
                             } catch (Exception err){
                         		err.printStackTrace();
                             }
+                        }
+                        else {
+                        	lockUpdatePanels = false;
                         }
                         break;
                     case "config":
@@ -542,21 +567,25 @@ public class FMainWindow extends JFrame
                         tabbedPaneMain.setSelectedComponent(panelInformation);
                         break;
                     case "select-all":
+                    	
+                    	lockUpdatePanels = true;
                     	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFiles) {
                     		panelLoadingPeaklistFiles.defaultTableModel.setAllValuesAt(true, 0);
                     	}
                     	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFilesDB) {
                     		panelLoadingPeaklistFilesDB.defaultTableModel.setAllValuesAt(true, 0);
                     	}
-                    	
+                    	lockUpdatePanels = false;
                     	break;
                     case "deselect-all":
+                    	lockUpdatePanels = true;
                     	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFiles) {
                     		panelLoadingPeaklistFiles.defaultTableModel.setAllValuesAt(false, 0);
                     	}
                     	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFilesDB) {
                     		panelLoadingPeaklistFilesDB.defaultTableModel.setAllValuesAt(false, 0);
                     	}
+                    	lockUpdatePanels = false;
                     	break;
                     
                     case "export-csv":
@@ -682,8 +711,8 @@ public class FMainWindow extends JFrame
     		panelLoadingPeaklistFilesDB.addPeaklistToTable(peaklist);
     		peaklist.selected = true;
     	}
-    	updateVisibleColums();
-    	panelLoadingPeaklistFilesDB.defaultTableModel.fireTableDataChanged();
+//    	updateVisibleColums();
+//    	panelLoadingPeaklistFilesDB.defaultTableModel.fireTableDataChanged();
     }
     
     public void addPeaklistToLoadingTable(final OPeaklist peaklist)
