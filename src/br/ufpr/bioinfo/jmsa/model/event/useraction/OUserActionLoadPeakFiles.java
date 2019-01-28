@@ -65,7 +65,10 @@ public class OUserActionLoadPeakFiles implements OEvento
                 progressBar.setIndeterminate(true);
                 progressBar.setValue(0);
                 lblStatusBar.setText("Progress...");
-                FMainWindow.getInstance().clearTable();
+                if(!FMainWindow.getInstance().checkBoxMenuItemIncrementalLoad.isSelected()) {                	
+                	FMainWindow.getInstance().clearTable();
+                }
+                
                 //
                 //
                 ArrayList<File> foundPeakFiles = new ArrayList<File>();

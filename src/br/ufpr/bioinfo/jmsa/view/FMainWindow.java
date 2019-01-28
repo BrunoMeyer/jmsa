@@ -106,6 +106,7 @@ public class FMainWindow extends JFrame
     public JMenu menuView = new JMenu("View");
     public JMenu menuShowColumns = new JMenu("Show Columns");
     public JMenu menuPlotTitle = new JMenu("Plot Name");
+    public JMenu menuLoadOptions = new JMenu("Load options");
     public JMenu menuHelp = new JMenu("Help");
     public JMenuItem menuItemLoadFiles = new JMenuItem("Load Files");
     public JMenuItem menuItemConfig = new JMenuItem("Configuration");
@@ -120,6 +121,7 @@ public class FMainWindow extends JFrame
     public JCheckBoxMenuItem checkBoxMenuItemPlotTitleSpecies = new JCheckBoxMenuItem("Species", CConfig.getInstance().plotTitleSpecies);
     public JCheckBoxMenuItem checkBoxMenuItemPlotTitleStrain = new JCheckBoxMenuItem("Strain", CConfig.getInstance().plotTitleStrain);
     public JCheckBoxMenuItem checkBoxMenuItemPlotEnableIntensity = new JCheckBoxMenuItem("Enable Intensity");
+    public JCheckBoxMenuItem checkBoxMenuItemIncrementalLoad = new JCheckBoxMenuItem("Incremental Loading");
     
     public JToolBar toolBar = new JToolBar("Tools");
     public JLabel labelStatusBar = new JLabel("JMSA");
@@ -184,6 +186,7 @@ public class FMainWindow extends JFrame
         menuFile.add(menuItemExit);
         menuView.add(menuShowColumns);
         menuView.add(menuPlotTitle);
+        menuView.add(menuLoadOptions);
         menuHelp.add(menuItemAbout);
         menuShowColumns.add(checkBoxMenuItemShowMSName);
         menuShowColumns.add(checkBoxMenuItemShowMSSpectrumID);
@@ -194,6 +197,8 @@ public class FMainWindow extends JFrame
         menuPlotTitle.add(checkBoxMenuItemPlotTitleSpecies);
         menuPlotTitle.add(checkBoxMenuItemPlotTitleStrain);
         menuPlotTitle.add(checkBoxMenuItemPlotEnableIntensity);
+        menuLoadOptions.add(checkBoxMenuItemIncrementalLoad);
+        
         //
         add(toolBar, BorderLayout.NORTH);
         add(splitPane, BorderLayout.CENTER);
@@ -230,7 +235,7 @@ public class FMainWindow extends JFrame
         tabbedPanePeaklist.addTab("Proteins", panelPeaklistProteins);
         tabbedPanePeaklist.addTab("Groups", panelPeaklistGroups);
         tabbedPanePeaklist.addTab("Similarity", panelPeaklistSimilarity);
-        //tabbedPanePeaklist.addTab("Cluster", panelPeaklistCluster);
+//        tabbedPanePeaklist.addTab("Cluster", panelPeaklistCluster);
      
         tabbedPanePeaklist.addTab("Informations", panelPeaklistInformations);
         scrollPeaklistTablesPlots.setViewportView(panelPeaklistTablesPlots);
@@ -623,6 +628,10 @@ public class FMainWindow extends JFrame
         
         checkBoxMenuItemPlotEnableIntensity.setActionCommand("PlotIntensity");
         checkBoxMenuItemPlotEnableIntensity.addActionListener(actionListener);
+        
+        checkBoxMenuItemPlotEnableIntensity.setActionCommand("IncrementalLoad");
+        checkBoxMenuItemIncrementalLoad.addActionListener(actionListener);
+        
         //
         menuItemLoadFiles.setActionCommand("loadpeakfiles");
         menuItemConfig.setActionCommand("config");
