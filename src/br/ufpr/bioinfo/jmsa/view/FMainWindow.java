@@ -270,7 +270,6 @@ public class FMainWindow extends JFrame
             	try
                 {
             		if(lockUpdatePanels) return;
-            		System.out.println(lockUpdatePanels);
             		List<OPeaklist> dbpeaklists = panelLoadingPeaklistFilesDB.defaultTableModel.getSelectedPeaklists();
 	            	List<OPeaklist> peaklists = panelLoadingPeaklistFiles.defaultTableModel.getSelectedPeaklists();
 	               
@@ -287,23 +286,11 @@ public class FMainWindow extends JFrame
 	            		panelDBManager.reloadClassifier(peaklists);
 	            	}
 	            	if(tabbedPaneMain.getSelectedComponent() == panelClassifier) {
-            			
-	            	}
-	            	if(tabbedPaneMain.getSelectedComponent() == panelCluster) {
-	            		List<OPeaklist> mergeDbLoad = new ArrayList<>(dbpeaklists);
-		                for(OPeaklist pk : peaklists) {
-		                	if( !isInDB(pk) ) {
-		                		mergeDbLoad.add(pk);
-		                	}
-		                }
-		                
-	                    panelClassifier.reloadScrollPeakList(peaklists,mergeDbLoad);
+	            		dbpeaklists.addAll(peaklists);
+	            		panelClassifier.reloadClassifier(peaklists,dbpeaklists);
 	            	}
 	                
-//	                panelDBManager.superSpectro.buildPlot(
-//		                peaklists,
-//		                checkBoxMenuItemPlotEnableIntensity.isSelected()
-//		            );
+	                
 	                
                 }
             	catch (Exception err)
@@ -471,6 +458,7 @@ public class FMainWindow extends JFrame
                         }
                         else {
                         	lockUpdatePanels = false;
+                        	firePeaklistPanelChange();
                         }
                         
                         updateVisibleColums();
@@ -526,6 +514,7 @@ public class FMainWindow extends JFrame
                         }
                         else {
                         	lockUpdatePanels = false;
+                        	firePeaklistPanelChange();
                         }
                         break;
                     case "config":
@@ -549,10 +538,8 @@ public class FMainWindow extends JFrame
                         panelCluster.reloadDendrogram(peaklists);
                         break;
                     case "tab-db-search":
-                    	dbpeaklists.addAll(peaklists);
                     	tabbedPaneMain.setSelectedComponent(panelClassifier);
-                        panelClassifier.removeAll();
-                        //panelClassifier.fillTable(peaklists);
+                    	dbpeaklists.addAll(peaklists);
                         panelClassifier.reloadClassifier(peaklists,dbpeaklists);
                         break;
                     case "tab-db-manager":
@@ -576,6 +563,7 @@ public class FMainWindow extends JFrame
                     		panelLoadingPeaklistFilesDB.defaultTableModel.setAllValuesAt(true, 0);
                     	}
                     	lockUpdatePanels = false;
+                    	firePeaklistPanelChange();
                     	break;
                     case "deselect-all":
                     	lockUpdatePanels = true;
@@ -586,6 +574,7 @@ public class FMainWindow extends JFrame
                     		panelLoadingPeaklistFilesDB.defaultTableModel.setAllValuesAt(false, 0);
                     	}
                     	lockUpdatePanels = false;
+                    	firePeaklistPanelChange();
                     	break;
                     
                     case "export-csv":
@@ -689,6 +678,14 @@ public class FMainWindow extends JFrame
         
         //        tabbedPanePeaklist.setEnabledAt(tabbedPanePeaklist.indexOfComponent(panelPeaklistSimilarity), false);
         //        tabbedPanePeaklist.setEnabledAt(tabbedPanePeaklist.indexOfComponent(panelPeaklistInformations), false);
+    }
+    public void firePeaklistPanelChange() {
+    	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFiles) {
+    		panelLoadingPeaklistFiles.defaultTableModel.fireTableDataChanged();
+    	}
+    	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFilesDB) {
+    		panelLoadingPeaklistFilesDB.defaultTableModel.fireTableDataChanged();
+    	}
     }
     
     public void clearTable()

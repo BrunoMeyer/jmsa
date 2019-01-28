@@ -80,6 +80,7 @@ public class PPeaklistClassifier extends JPanel
             	selectPeak();
             }
         });
+        
     }
     
     // Update the view of table and spectre of peaklist selected
@@ -191,7 +192,10 @@ public class PPeaklistClassifier extends JPanel
             public int compare(NameNumber o1, NameNumber o2) {
                 if (o1.similarity > o2.similarity)
                 	return -1;
-                return 1;
+                else if(o1.similarity < o2.similarity)
+                	return 1;
+                
+                return 0;
             }
         });
         
@@ -219,32 +223,18 @@ public class PPeaklistClassifier extends JPanel
         
     }
     
-    public void reloadScrollPeakList(List<OPeaklist> newLoadingPeakLists, List<OPeaklist> newPeaklists) {
-    	if(newPeaklists.size() <= 0)
-    		return;
-    	
-    	if(newPeaklists != null) {
-    		peaklists = newPeaklists;
-    		loadingPeakLists = newLoadingPeakLists;
-    	}
-    	
-    	myContent.remove(scrollPanePeaklistFiles);
-    	myContent.removeAll();
-    	
-    	
-    	add(scrollPanePeaklistFiles, BorderLayout.CENTER);
-    }
+    
     public void reloadClassifier(List<OPeaklist> newLoadingPeakLists, List<OPeaklist> newPeaklists){
-    	
-    	if(newPeaklists.size() <= 0)
+    	if(newPeaklists.size() <= 0 || newLoadingPeakLists.size() <= 0)
     		return;
     	
     	if(newPeaklists != null) {
     		peaklists = newPeaklists;
     		loadingPeakLists = newLoadingPeakLists;
     	}
-        
-    	reloadScrollPeakList(newLoadingPeakLists, newPeaklists);
+    	this.removeAll();
+    	myContent.removeAll();
+//    	reloadScrollPeakList(newLoadingPeakLists, newPeaklists);
     	
         NameNumber[] distances = new NameNumber[peaklists.size()];
 
@@ -276,15 +266,15 @@ public class PPeaklistClassifier extends JPanel
     	myContent.add(spectreVisualizer);
     	myContent.add(table);
     	
-    	scrollPanePeaklistFiles.setViewportView(myContent);
-    	
     	table.getTableHeader().setDefaultRenderer(new PeaklistSimilarityTableStringCellRenderer(peaklists, table.getTableHeader().getDefaultRenderer()));
         
     	
     	
     	selectedPeaksNumber = new JLabel("");
     	
-
+    	scrollPanePeaklistFiles.setViewportView(myContent);
+    	this.add(scrollPanePeaklistFiles, BorderLayout.CENTER);
+    	
     	panel.add(selectedPeaksNumber);
     	panel.add(buttonClassify);
     	
