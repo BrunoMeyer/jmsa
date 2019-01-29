@@ -214,13 +214,53 @@ public class PPeaklistFiles extends JPanel
     	);
     }
     
+    private JSONObject createFileOnZIP(OPeaklist peaklist, ZipOutputStream zos, byte[] buffer) throws IOException {
+    	
+    	ZipEntry ze;
+    	String file_name = peaklist.peaklistFile.toString();
+		String file_path = 
+				"files"+File.separator+peaklist.toString()+File.separator+"peaklist.xml";
+		ze = new ZipEntry(file_path);
+		zos.putNextEntry(ze);
+		
+		JSONObject peak_obj = new JSONObject();
+		
+		peak_obj.put("id", peaklist.toString());
+		peak_obj.put("path", file_path);
+		
+		FileInputStream in = new FileInputStream(file_name);
+		
+		// This is needed to create the zip file
+		// The size of buffer defined before can be a future problem
+		int len;
+		while ((len = in.read(buffer)) > 0) {
+			zos.write(buffer, 0, len);
+		}
+		in.close();
+		
+		return peak_obj;
+    }
+    
+    public boolean isPeakInJSONObject(OPeaklist peaklist, JSONArray peaklists_json_array) {
+    	for(Object obj : peaklists_json_array) {
+			if(peaklist.toString().equals((String)((JSONObject)obj).get("id"))) {
+				return true;
+			}
+		}
+    	return false;
+    }
+    
     public void saveToZIP(String path_to_save) {
     	// IMPORTANT: Any modification in this method
     	// can cause an incompatibility of versions on this program
     	// Please, do not change the file names created
     	
     	try {
-	    	List<OPeaklist> peaklists = this.defaultTableModel.getSelectedPeaklists();
+    		
+    		// The copy is necessary because this list may be changed
+	    	List<OPeaklist> peaklists = new ArrayList<>(
+    			this.defaultTableModel.getSelectedPeaklists()
+	    	);
 	    	
 	    	String zipFile = path_to_save;
 			
@@ -232,8 +272,7 @@ public class PPeaklistFiles extends JPanel
 			// Instance variables that will be used for create an zip file
 			// that represent the database 
 			byte[] buffer = new byte[1024];
-			FileInputStream in;
-			ZipEntry ze;
+			
 			int len;
 			
 			// An json file named peaklistJMSA.json will be created
@@ -262,45 +301,32 @@ public class PPeaklistFiles extends JPanel
 					
 					for (OPeaklist sp_peaklist : sp.peaklists){
 						sp_peaklists_json_array.add(sp_peaklist.toString());
+						
+						boolean already_saved = isPeakInJSONObject(sp_peaklist, peaklists_json_array);
+		    			if(!already_saved) {
+		    				peaklists_json_array.add(
+	    						createFileOnZIP(sp_peaklist, zos, buffer)
+							);
+		    			}
+
 					}
 					super_peak_obj.put("id", sp.toString());
 					super_peak_obj.put("peaklists_ids", sp_peaklists_json_array);
 					super_peak_obj.put("distance_merge_peak", sp.distance_merge_peak);
 					superpeaks_json_array.add(super_peak_obj);
+					
 				}
 				else {
 	    			
-	    			boolean already_saved = false;
-	    			for(Object obj : peaklists_json_array) {
-	    				if(peaklist.toString().equals((String)((JSONObject)obj).get("id"))) {
-	    					already_saved = true;
-	    				}
-	    			}
+	    			boolean already_saved = isPeakInJSONObject(peaklist, peaklists_json_array);
 	    			
 	    			if(!already_saved) {
-	    				String file_name = peaklist.peaklistFile.toString();
-		    			String file_path = 
-		    					"files"+File.separator+peaklist.toString()+File.separator+"peaklist.xml";
-		    			ze = new ZipEntry(file_path);
-		    			zos.putNextEntry(ze);
-		    			
-		    			JSONObject peak_obj = new JSONObject();
-		    			
-	    				peak_obj.put("id", peaklist.toString());
-		        		peak_obj.put("path", file_path);
-		        		peaklists_json_array.add(peak_obj);
-		    			in = new FileInputStream(file_name);
-		    			
-		    			// This is needed to create the zip file
-		    			// The size of buffer defined before can be a future problem
-		    			while ((len = in.read(buffer)) > 0) {
-		    				zos.write(buffer, 0, len);
-		    			}
-		    			in.close();
-	    			}else {
-	    				System.out.println("Erro no carregamento: Peaklists ID duplicados");
+	    				peaklists_json_array.add(
+    						createFileOnZIP(peaklist, zos, buffer)
+						);
+	    			} else {
+	    				System.out.println("Erro no salvamento: Peaklists ID duplicados");
 	    			}
-	        		
 				}
 			}
 			
@@ -323,9 +349,9 @@ public class PPeaklistFiles extends JPanel
 			}
 			
 			// Finally, save the json inside zip file
-			ze = new ZipEntry(tempFileName);
+			ZipEntry ze = new ZipEntry(tempFileName);
 			zos.putNextEntry(ze);
-			in = new FileInputStream(tempFile.getAbsoluteFile());
+			FileInputStream in = new FileInputStream(tempFile.getAbsoluteFile());
 			while ((len = in.read(buffer)) > 0) {
 				zos.write(buffer, 0, len);
 			}

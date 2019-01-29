@@ -291,8 +291,13 @@ public class FMainWindow extends JFrame
 	            		panelDBManager.reloadClassifier(peaklists);
 	            	}
 	            	if(tabbedPaneMain.getSelectedComponent() == panelClassifier) {
-	            		dbpeaklists.addAll(peaklists);
-	            		panelClassifier.reloadClassifier(peaklists,dbpeaklists);
+	            		List<OPeaklist> mergeDbLoad = new ArrayList<>(dbpeaklists);
+		                for(OPeaklist pk : peaklists) {
+		                	if( !isInDB(pk) ) {
+		                		mergeDbLoad.add(pk);
+		                	}
+		                }
+	            		panelClassifier.reloadClassifier(peaklists,mergeDbLoad);
 	            	}
 	                
 	                
@@ -508,9 +513,9 @@ public class FMainWindow extends JFrame
                     	
                     	if(lockUpdatePanels) break;
                         
-                        lockUpdatePanels = true;
-                        FMainWindow.getInstance().clearTable();
                         if (chooserSave.showOpenDialog(FMainWindow.this) == JFileChooser.APPROVE_OPTION) {
+                        	lockUpdatePanels = true;
+                        	FMainWindow.getInstance().clearTable();
                         	// When the user choose a file name and directory to save
                             try {
                             	for(File f : chooserSave.getSelectedFiles()) {
