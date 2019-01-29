@@ -18,10 +18,17 @@ import br.ufpr.bioinfo.jmsa.view.FMainWindow;
 public class OUserActionLoadPeakFiles implements OEvento
 {
     public File[] seletedFolders;
+
+    public boolean incremental = false;
     
     public OUserActionLoadPeakFiles(File[] seletedFolders)
     {
         this.seletedFolders = seletedFolders;
+    }
+    public OUserActionLoadPeakFiles(File[] seletedFolders, boolean incremental)
+    {
+        this.seletedFolders = seletedFolders;
+        this.incremental = incremental;
     }
     
     @Override
@@ -45,6 +52,7 @@ public class OUserActionLoadPeakFiles implements OEvento
         dialog.add(BorderLayout.SOUTH, pane);
         dialog.setAlwaysOnTop(true);
         dialog.pack();
+        
         //
         //
         //
@@ -65,8 +73,8 @@ public class OUserActionLoadPeakFiles implements OEvento
                 progressBar.setIndeterminate(true);
                 progressBar.setValue(0);
                 lblStatusBar.setText("Progress...");
-                if(!FMainWindow.getInstance().checkBoxMenuItemIncrementalLoad.isSelected()) {                	
-                	FMainWindow.getInstance().clearTable();
+                if(!FMainWindow.getInstance().checkBoxMenuItemIncrementalLoad.isSelected() && !this.incremental) {                	
+                	FMainWindow.getInstance().clearTable(); 
                 }
                 
                 //
