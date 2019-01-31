@@ -3,6 +3,7 @@ package br.ufpr.bioinfo.jmsa.view.core;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -26,6 +27,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -52,7 +55,7 @@ public class PPeaklistDBManager extends JPanel
     public JPanel spectreVisualizer = new JPanel();
     
     public JLabel selectedPeaksNumber = null;
-    private JButton buttonMerge = new JButton("Merge spectres selected");
+    private JButton buttonMerge = new JButton("Create Super Spectre from selected peaklists");
     //
     private List<OPeaklist> peaklists;
     private List<OPeaklist> loadingPeakLists;
@@ -64,10 +67,15 @@ public class PPeaklistDBManager extends JPanel
     
     private JSpinner spinner;
     
-    public PSuperPeaklistPlot superSpectro = new PSuperPeaklistPlot();
+    public PPeaklistPlot superSpectroPlot;
+    public SuperPeaklist superpeaklist;
+    
     public PPeaklistDBManager(FMainWindow fmain)
     {
     	this.fmain = fmain;
+    	spinner = new JSpinner();
+    	spinner.setValue(200);
+    	
     	myContent.setLayout((LayoutManager) new BoxLayout(myContent, BoxLayout.Y_AXIS));
         //
     	
@@ -239,11 +247,40 @@ public class PPeaklistDBManager extends JPanel
         
     }
     
+    public void reloadSuperSpectrePlot() {
+    	if(this.peaklists.size() <= 0) return;
+    	try {
+    		if(this.superSpectroPlot != null) myContent.remove(this.superSpectroPlot);
+			this.superpeaklist = new SuperPeaklist(this.peaklists.get(0).peaklistFile);
+			for(OPeaklist pk : this.peaklists) {
+				this.superpeaklist.addPeaklist(pk);
+	        }
+			superpeaklist.setDistanceMergePeak((int)spinner.getValue());
+			
+			this.superSpectroPlot = new PPeaklistPlot(
+				this.superpeaklist,
+				fmain.checkBoxMenuItemPlotEnableIntensity.isSelected()
+			);
+			this.superSpectroPlot.setLayout(new GridLayout(1, 0));
+			this.myContent.add(this.superSpectroPlot);
+			this.myContent.revalidate();
+			this.myContent.repaint();
+		} catch (ParserConfigurationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (SAXException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    }
    
     public void reloadClassifier(List<OPeaklist> peaklists){
-    	
-    	FMainWindow.getInstance().lockUpdatePanels = true;
     	this.peaklists = peaklists;
+    	myContent.removeAll();
+    	if(this.peaklists.size() <= 0) return;
 //    	PPeaklistFiles newList = fmain.panelLoadingPeaklistFilesDB.clone();
 //    	newList.setMarkersVisibility(false);
 //    	newList.setGlobalTrigger(false);
@@ -268,38 +305,46 @@ public class PPeaklistDBManager extends JPanel
 //        
 //            }
 //        });
-    	myContent.removeAll();
+    	
     	JPanel topPanel = new JPanel();
     	topPanel.setLayout(new GridLayout(1, 2));
     	
-//    	JLabel teste = new JLabel("Teste");
+
     	JPanel topLeftPanel = new JPanel();
-//    	topRightPanel.add(teste);
     	
-    	spinner = new JSpinner();
-    	spinner.setValue(200);
-    	topLeftPanel.add(buttonMerge);
-    	topLeftPanel.add(spinner);
+    	topLeftPanel.setLayout(new GridLayout(2,1));
+    	
+    	JPanel flowPanel = new JPanel(new FlowLayout());
+    	flowPanel.add(buttonMerge);
+    	topLeftPanel.add(flowPanel);
+    	
+    	JPanel configPanel = new JPanel();
+    	configPanel.add(new JLabel("Limiar distance used to merge peaks:"));
+    	configPanel.add(spinner);
+    	topLeftPanel.add(configPanel);
+    	
+    	
+    	
     	
     	topPanel.add(topLeftPanel);
-//    	topPanel.add(newList);
-    	this.superSpectro.setLayout(new GridLayout(1, 0));
-    	this.superSpectro.buildPlot(
-    		peaklists,
-    		fmain.checkBoxMenuItemPlotEnableIntensity.isSelected()
-    	);
-    	
-    	
+
     	myContent.add(topPanel);
-    	myContent.add(this.superSpectro);
     	myContent.setLayout(new GridLayout(2, 1));
     	
     	scrollPanePeaklistFiles.setViewportView(myContent);
     	add(scrollPanePeaklistFiles, BorderLayout.CENTER);
     	
+    	PPeaklistDBManager self = this;
+    	spinner.addChangeListener(new ChangeListener() {
+    	    @Override
+    	    public void stateChanged(ChangeEvent e) {
+    	    	self.reloadSuperSpectrePlot();
+    	    }
+    	});
+    	
+    	self.reloadSuperSpectrePlot();
     	
         revalidate();
-        FMainWindow.getInstance().lockUpdatePanels = false;
     }
     
     public void fillTable(List<OPeaklist> peaklists)

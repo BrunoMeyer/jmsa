@@ -21,6 +21,7 @@ public class SuperPeaklist extends OPeaklist{
 
 	public int distance_merge_peak = 200;
 	
+	public ArrayList<OPeak> peaklistMerged;
 	public SuperPeaklist(ArrayList<OPeaklist> peaklists) throws ParserConfigurationException, SAXException, IOException{
 		super(peaklists.get(0).peaklistFile);
 		ArrayList<OPeaklist> clone = (ArrayList<OPeaklist>) peaklists.clone();
@@ -30,6 +31,7 @@ public class SuperPeaklist extends OPeaklist{
 		String threadId = decimalFormat.format(Thread.currentThread().getId());
 		String time = decimalFormat.format(System.currentTimeMillis());
 		this.spectrumid = "SE-"+time+threadId;
+		this.buildPeaks();
 	}
 	// Constructors
 	public SuperPeaklist(File peaklistFile) throws ParserConfigurationException, SAXException, IOException {
@@ -38,15 +40,20 @@ public class SuperPeaklist extends OPeaklist{
 	
 	public void setDistanceMergePeak(int newDistance) {
 		this.distance_merge_peak = newDistance;
+		this.buildPeaks();
 	}
-
 	
 	//Override methods from OPeaklist class
-	
+
 	//TODO: Add others possibilities to merge the spectres.
 	//      The user may chosen this methods on configuration
 	@Override
 	public ArrayList<OPeak> getPeaks() {
+		return this.peaklistMerged;
+	}
+	
+	
+	public void buildPeaks() {
 		ArrayList<OPeak> newPeaklist = new ArrayList<OPeak>();
 		
 		for (OPeaklist peaklist : this.peaklists){
@@ -93,7 +100,7 @@ public class SuperPeaklist extends OPeaklist{
 			i++;
 		}
 		
-		return newPeaklistMerged;
+		this.peaklistMerged = newPeaklistMerged;
     }
 	
 	
@@ -115,6 +122,7 @@ public class SuperPeaklist extends OPeaklist{
 
 	public void addPeaklist(OPeaklist newPeaklist) {
 		this.peaklists.add(newPeaklist);
+		this.buildPeaks();
 	}
 	
 	public void removePeaklist(OPeaklist newPeaklist) {
@@ -123,9 +131,11 @@ public class SuperPeaklist extends OPeaklist{
 				this.peaklists.add(newPeaklist);
 			}
 		}
+		this.buildPeaks();
 	}
 	
 	public void removePeaklistAt(int index) {
 		this.removePeaklist( peaklists.get(index) );
+		this.buildPeaks();
 	}
 }
