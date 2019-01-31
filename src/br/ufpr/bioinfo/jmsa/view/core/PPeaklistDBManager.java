@@ -241,15 +241,17 @@ public class PPeaklistDBManager extends JPanel
     
    
     public void reloadClassifier(List<OPeaklist> peaklists){
+    	
+    	FMainWindow.getInstance().lockUpdatePanels = true;
     	this.peaklists = peaklists;
-    	PPeaklistFiles newList = fmain.panelLoadingPeaklistFilesDB.clone();
-    	newList.setMarkersVisibility(false);
-    	newList.setGlobalTrigger(false);
-    	newList.defaultTableModel.addTableModelListener(new TableModelListener()
-        {
-            @Override
-            public void tableChanged(TableModelEvent e)
-            {
+//    	PPeaklistFiles newList = fmain.panelLoadingPeaklistFilesDB.clone();
+//    	newList.setMarkersVisibility(false);
+//    	newList.setGlobalTrigger(false);
+//    	newList.defaultTableModel.addTableModelListener(new TableModelListener()
+//        {
+//            @Override
+//            public void tableChanged(TableModelEvent e)
+//            {
 //
 //                int rowIndex = newList.table.getSelectedRow();
 //                int colIndex = newList.table.getSelectedColumn();
@@ -264,8 +266,8 @@ public class PPeaklistDBManager extends JPanel
 //                	revalidate();
 //                }
 //        
-            }
-        });
+//            }
+//        });
     	myContent.removeAll();
     	JPanel topPanel = new JPanel();
     	topPanel.setLayout(new GridLayout(1, 2));
@@ -280,7 +282,7 @@ public class PPeaklistDBManager extends JPanel
     	topLeftPanel.add(spinner);
     	
     	topPanel.add(topLeftPanel);
-    	topPanel.add(newList);
+//    	topPanel.add(newList);
     	this.superSpectro.setLayout(new GridLayout(1, 0));
     	this.superSpectro.buildPlot(
     		peaklists,
@@ -297,7 +299,7 @@ public class PPeaklistDBManager extends JPanel
     	
     	
         revalidate();
-    	
+        FMainWindow.getInstance().lockUpdatePanels = false;
     }
     
     public void fillTable(List<OPeaklist> peaklists)

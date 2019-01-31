@@ -269,6 +269,7 @@ public class FMainWindow extends JFrame
         });
         tabbedPaneMain.addChangeListener(new ChangeListener()
         {
+        	
             @Override
             public void stateChanged(ChangeEvent e)
             {
@@ -284,13 +285,13 @@ public class FMainWindow extends JFrame
     	                	checkBoxMenuItemPlotEnableIntensity.isSelected()
     	                );
 	            	}
-	            	if(tabbedPaneMain.getSelectedComponent() == panelCluster) {
+	            	else if(tabbedPaneMain.getSelectedComponent() == panelCluster) {
 	            		panelCluster.reloadDendrogram(peaklists);
 	            	}
-	            	if(tabbedPaneMain.getSelectedComponent() == panelDBManager) {
+	            	else if(tabbedPaneMain.getSelectedComponent() == panelDBManager) {
 	            		panelDBManager.reloadClassifier(peaklists);
 	            	}
-	            	if(tabbedPaneMain.getSelectedComponent() == panelClassifier) {
+	            	else if(tabbedPaneMain.getSelectedComponent() == panelClassifier) {
 	            		List<OPeaklist> mergeDbLoad = new ArrayList<>(dbpeaklists);
 		                for(OPeaklist pk : peaklists) {
 		                	if( !isInDB(pk) ) {
@@ -299,9 +300,6 @@ public class FMainWindow extends JFrame
 		                }
 	            		panelClassifier.reloadClassifier(peaklists,mergeDbLoad);
 	            	}
-	                
-	                
-	                
                 }
             	catch (Exception err)
                 {
@@ -716,7 +714,26 @@ public class FMainWindow extends JFrame
     	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFilesDB) {
     		panelLoadingPeaklistFilesDB.clearTable();
     	}
-        
+    }
+    
+    public void setTableTriggerChange(boolean active)
+    {
+    	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFiles) {
+    		panelLoadingPeaklistFiles.defaultTableModel.globalTrigger = active;
+    	}
+    	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFilesDB) {
+    		panelLoadingPeaklistFilesDB.defaultTableModel.globalTrigger = active;
+    	}
+    }
+    
+    public void updateTable()
+    {
+    	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFiles) {
+    		panelLoadingPeaklistFiles.defaultTableModel.fireTableDataChanged();
+    	}
+    	if(tabbedPaneFiles.getSelectedComponent() == panelLoadingPeaklistFilesDB) {
+    		panelLoadingPeaklistFilesDB.defaultTableModel.fireTableDataChanged();
+    	}
     }
     
     public void addPeaklistToTable(final OPeaklist peaklist)
@@ -729,7 +746,6 @@ public class FMainWindow extends JFrame
     		peaklist.selected = true;
     	}
 //    	updateVisibleColums();
-//    	panelLoadingPeaklistFilesDB.defaultTableModel.fireTableDataChanged();
     }
     
     public void addPeaklistToLoadingTable(final OPeaklist peaklist)

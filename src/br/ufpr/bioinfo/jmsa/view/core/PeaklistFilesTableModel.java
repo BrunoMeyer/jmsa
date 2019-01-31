@@ -56,6 +56,7 @@ public class PeaklistFilesTableModel extends AbstractTableModel
     public void addRow(OPeaklist peaklist)
     {
         addPeaklist(peaklist);
+        if(this.globalTrigger) fireTableDataChanged();
     }
     
     public void removeRow(OPeaklist peaklist)

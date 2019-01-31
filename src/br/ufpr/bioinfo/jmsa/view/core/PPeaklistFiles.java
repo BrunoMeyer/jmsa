@@ -39,6 +39,7 @@ import org.xml.sax.SAXException;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
 import br.ufpr.bioinfo.jmsa.model.SuperPeaklist;
 import br.ufpr.bioinfo.jmsa.model.event.useraction.OUserActionLoadPeakFiles;
+import br.ufpr.bioinfo.jmsa.model.event.useraction.OEvento.CallBackEvent;
 import br.ufpr.bioinfo.jmsa.view.FMainWindow;
 
 public class PPeaklistFiles extends JPanel
@@ -116,39 +117,39 @@ public class PPeaklistFiles extends JPanel
     
     public void clearTable()
     {
-        SwingUtilities.invokeLater(new Runnable()
-        {
-            public void run()
-            {
-                try
-                {
-                    defaultTableModel.clear();
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        });
+//        SwingUtilities.invokeLater(new Runnable()
+//        {
+//            public void run()
+//            {
+//                try
+//                {
+                	 defaultTableModel.clear();
+//                }
+//                catch (Exception e)
+//                {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
     }
     
     public void addPeaklistToTable(final OPeaklist peaklist)
     {
-        SwingUtilities.invokeLater(new Runnable()
-        {
-            public void run()
-            {
-                try
-                {
+//        SwingUtilities.invokeLater(new Runnable()
+//        {
+//            public void run()
+//            {
+//                try
+//                {
                     defaultTableModel.addRow(peaklist);
-                    defaultTableModel.fireTableDataChanged();
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        });
+
+//                }
+//                catch (Exception e)
+//                {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
     }
     
     public void removePeaklistFromTable(final OPeaklist peaklist) {
@@ -214,36 +215,61 @@ public class PPeaklistFiles extends JPanel
     	);
     }
     
-    private JSONObject createFileOnZIP(OPeaklist peaklist, ZipOutputStream zos, byte[] buffer) throws IOException {
+    private void createFileOnZIP(
+    		OPeaklist peaklist, ZipOutputStream zos,
+    		byte[] buffer, JSONArray peaklists_json_array,
+    		JSONArray superpeaks_json_array
+    		) throws IOException {
     	
-    	ZipEntry ze;
-    	String file_name = peaklist.peaklistFile.toString();
-		String file_path = 
-				"files"+File.separator+peaklist.toString()+File.separator+"peaklist.xml";
-		ze = new ZipEntry(file_path);
-		zos.putNextEntry(ze);
+    	boolean already_saved = isPeakInJSONObject(peaklist, peaklists_json_array);
+    	already_saved = already_saved || isPeakInJSONObject(peaklist, superpeaks_json_array);
+    	if(already_saved) return;
 		
-		JSONObject peak_obj = new JSONObject();
-		
-		peak_obj.put("id", peaklist.toString());
-		peak_obj.put("path", file_path);
-		
-		FileInputStream in = new FileInputStream(file_name);
-		
-		// This is needed to create the zip file
-		// The size of buffer defined before can be a future problem
-		int len;
-		while ((len = in.read(buffer)) > 0) {
-			zos.write(buffer, 0, len);
+
+		if(peaklist instanceof SuperPeaklist) {
+			SuperPeaklist sp = (SuperPeaklist) peaklist;			
+			JSONArray sp_peaklists_json_array = new JSONArray();
+			JSONObject super_peak_obj = new JSONObject();
+			super_peak_obj.put("id", sp.toString());
+			super_peak_obj.put("peaklists_ids", sp_peaklists_json_array);
+			super_peak_obj.put("distance_merge_peak", sp.distance_merge_peak);
+			superpeaks_json_array.add(super_peak_obj);
+			
+			for (OPeaklist sp_peaklist : sp.peaklists){
+				sp_peaklists_json_array.add(sp_peaklist.spectrumid.toString());
+				createFileOnZIP(sp_peaklist, zos, buffer, peaklists_json_array, superpeaks_json_array);
+			}
+			
 		}
-		in.close();
-		
-		return peak_obj;
+		else {
+			ZipEntry ze;
+	    	String file_name = peaklist.peaklistFile.toString();
+			String file_path = 
+					"files"+File.separator+peaklist.spectrumid.toString()+File.separator+"peaklist.xml";
+			ze = new ZipEntry(file_path);
+			zos.putNextEntry(ze);
+			
+			JSONObject peak_obj = new JSONObject();
+			
+			peak_obj.put("id", peaklist.spectrumid.toString());
+			peak_obj.put("path", file_path);
+			
+			FileInputStream in = new FileInputStream(file_name);
+			
+			// This is needed to create the zip file
+			// The size of buffer defined before can be a future problem
+			int len;
+			while ((len = in.read(buffer)) > 0) {
+				zos.write(buffer, 0, len);
+			}
+			in.close();
+			peaklists_json_array.add(peak_obj);
+		}
     }
     
     public boolean isPeakInJSONObject(OPeaklist peaklist, JSONArray peaklists_json_array) {
     	for(Object obj : peaklists_json_array) {
-			if(peaklist.toString().equals((String)((JSONObject)obj).get("id"))) {
+			if(peaklist.spectrumid.toString().equals((String)((JSONObject)obj).get("id"))) {
 				return true;
 			}
 		}
@@ -293,41 +319,9 @@ public class PPeaklistFiles extends JPanel
 			
 			// For each peaklist selected, save it on "files/peaklistid.xml" inside zip file
 			// If the peaklist instance was an superspectre, just add it on json file
+			
 			for (OPeaklist peaklist : peaklists){
-				if(peaklist instanceof SuperPeaklist) {
-					SuperPeaklist sp = (SuperPeaklist) peaklist;
-					JSONObject super_peak_obj = new JSONObject();
-					JSONArray sp_peaklists_json_array = new JSONArray();
-					
-					for (OPeaklist sp_peaklist : sp.peaklists){
-						sp_peaklists_json_array.add(sp_peaklist.toString());
-						
-						boolean already_saved = isPeakInJSONObject(sp_peaklist, peaklists_json_array);
-		    			if(!already_saved) {
-		    				peaklists_json_array.add(
-	    						createFileOnZIP(sp_peaklist, zos, buffer)
-							);
-		    			}
-
-					}
-					super_peak_obj.put("id", sp.toString());
-					super_peak_obj.put("peaklists_ids", sp_peaklists_json_array);
-					super_peak_obj.put("distance_merge_peak", sp.distance_merge_peak);
-					superpeaks_json_array.add(super_peak_obj);
-					
-				}
-				else {
-	    			
-	    			boolean already_saved = isPeakInJSONObject(peaklist, peaklists_json_array);
-	    			
-	    			if(!already_saved) {
-	    				peaklists_json_array.add(
-    						createFileOnZIP(peaklist, zos, buffer)
-						);
-	    			} else {
-	    				System.out.println("Erro no salvamento: Peaklists ID duplicados");
-	    			}
-				}
+				createFileOnZIP(peaklist, zos, buffer, peaklists_json_array, superpeaks_json_array);
 			}
 			
 	
@@ -439,14 +433,10 @@ public class PPeaklistFiles extends JPanel
             OUserActionLoadPeakFiles peaksLoader = new OUserActionLoadPeakFiles(
         		new File[] {dir}, true
             );
-            peaksLoader.executarEvento();
-            FMainWindow.getInstance().updateVisibleColums();
             
-            
-            SwingUtilities.invokeLater(new Runnable()
-            {
-                public void run()
-                {
+            PPeaklistFiles me = this;
+            CallBackEvent afterLoadPeaklists = new CallBackEvent(){
+                public void callback() {
                 	if(super_peaks != null) {
         	            Iterator<JSONObject> iterator_super_spectres = super_peaks.iterator();
         	            while (iterator_super_spectres.hasNext()) {
@@ -458,6 +448,7 @@ public class PPeaklistFiles extends JPanel
         	            	
         		            Iterator<String> iterator_peaklists_id_ = peaklists_id.iterator();
         		            List<OPeaklist> peaklists = new ArrayList();
+        		            
         		            
         		            while (iterator_peaklists_id_.hasNext()) {
         		            	String p_id = iterator_peaklists_id_.next();
@@ -478,8 +469,20 @@ public class PPeaklistFiles extends JPanel
         					}
         	            }
                     }
+                	
                 }
-            });
+            };
+            peaksLoader.afterEvent = afterLoadPeaklists;
+            peaksLoader.executarEvento();
+            FMainWindow.getInstance().updateVisibleColums();
+            
+//            SwingUtilities.invokeLater(new Runnable()
+//            {
+//                public void run()
+//                {
+//                	
+//                }
+//            });
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -12,24 +12,39 @@ import javax.swing.SwingUtilities;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
+import br.ufpr.bioinfo.jmsa.model.event.useraction.OEvento.CallBackEvent;
 import br.ufpr.bioinfo.jmsa.utils.CUtils;
 import br.ufpr.bioinfo.jmsa.view.FMainWindow;
 
 public class OUserActionLoadPeakFiles implements OEvento
 {
+	
     public File[] seletedFolders;
-
+    public CallBackEvent afterEvent;
+    
     public boolean incremental = false;
     
     public OUserActionLoadPeakFiles(File[] seletedFolders)
     {
         this.seletedFolders = seletedFolders;
+        this.afterEvent = new CallBackEvent(){
+            public void callback() {
+            	return;
+            }
+        };
     }
     public OUserActionLoadPeakFiles(File[] seletedFolders, boolean incremental)
     {
         this.seletedFolders = seletedFolders;
         this.incremental = incremental;
+        this.afterEvent = new CallBackEvent(){
+            public void callback() {
+            	return;
+            }
+        };
     }
+    
+
     
     @Override
     public synchronized void executarEvento()
@@ -67,9 +82,11 @@ public class OUserActionLoadPeakFiles implements OEvento
         
         //
         try
-        {
+        {	
+        	
             if (seletedFolders.length > 0)
             {
+            	FMainWindow.getInstance().setTableTriggerChange(false);
                 progressBar.setIndeterminate(true);
                 progressBar.setValue(0);
                 lblStatusBar.setText("Progress...");
@@ -138,6 +155,7 @@ public class OUserActionLoadPeakFiles implements OEvento
         }
         catch (InterruptedException e1)
         {
+        	FMainWindow.getInstance().setTableTriggerChange(true);
             e1.printStackTrace();
         }
         catch (Exception e1)
@@ -148,12 +166,21 @@ public class OUserActionLoadPeakFiles implements OEvento
             progressBar.setValue(0);
             lblStatusBar.setText("Progress...");
             FMainWindow.getInstance().clearTable();
+            FMainWindow.getInstance().setTableTriggerChange(true);
         }
         finally
         {
             dialog.dispose();
+            afterEvent.callback();
+            FMainWindow.getInstance().setTableTriggerChange(true);
+            FMainWindow.getInstance().updateTable();
         }
         FMainWindow.getInstance().lockUpdatePanels = false;
         System.out.println("Finalizando o Loading: " + (System.currentTimeMillis() - start));
+        
     }
+    
 }
+
+
+

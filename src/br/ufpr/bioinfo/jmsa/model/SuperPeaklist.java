@@ -48,8 +48,8 @@ public class SuperPeaklist extends OPeaklist{
 	@Override
 	public ArrayList<OPeak> getPeaks() {
 		ArrayList<OPeak> newPeaklist = new ArrayList<OPeak>();
+		
 		for (OPeaklist peaklist : this.peaklists){
-			
 			for (OPeak peak : peaklist.getPeaks()){
 //				OPeak newPeak = new OPeak();
 				newPeaklist.add(peak);
