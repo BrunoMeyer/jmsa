@@ -142,7 +142,7 @@ public class CConfig
     {
         try
         {
-            UIManager.setLookAndFeel(lookAndFeel);
+//            UIManager.setLookAndFeel(lookAndFeel);
             SwingUtilities.updateComponentTreeUI(FMainWindow.getInstance());
             FMainWindow.getInstance().pack();
         }

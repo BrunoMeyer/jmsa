@@ -69,6 +69,10 @@ public class OPeaklist
         }
     }
     
+    public ArrayList<OPeak> getPeaks() {
+    	return this.peaks;
+    }
+    
     public PPeaklistTable getPeaklistTable()
     {
         if (valid)
@@ -138,8 +142,8 @@ public class OPeaklist
                         version = elementpklist.getAttributes().getNamedItem("version").getNodeValue();
                         //
                         //
-                        //TODO MALTON: Todo o conte�do de 'pklist' poderia ser preenchido posteriormente para poupar processamento
-                        //TODO MALTON: Posteriormente como, ao selecionar um Peaklist para visualiza��o
+                        //TODO MALTON: Todo o conteudo de 'pklist' poderia ser preenchido posteriormente para poupar processamento
+                        //TODO MALTON: Posteriormente como, ao selecionar um Peaklist para visualizacao
                         NodeList nodeListpk = elementpklist.getElementsByTagName("pk");
                         if (nodeListpk != null)
                         {

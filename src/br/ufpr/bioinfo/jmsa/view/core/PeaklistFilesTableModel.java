@@ -8,15 +8,20 @@ public class PeaklistFilesTableModel extends AbstractTableModel
 {
     private ArrayList<OPeaklist> peaklists = new ArrayList<OPeaklist>();
     public String[] columnNames = new String[] { "Selected", "Reflex", "Name", "SpectrumID", "Species", "Strain" };
-    
+    public boolean globalTrigger = true;
     public PeaklistFilesTableModel()
     {
+    }
+    
+    public PeaklistFilesTableModel(boolean globalTrigger)
+    {
+    	this.globalTrigger = globalTrigger;
     }
     
     public void addPeaklist(OPeaklist peaklist)
     {
         peaklists.add(peaklist);
-        fireTableDataChanged();
+        if(this.globalTrigger) fireTableDataChanged();
     }
     
     public OPeaklist getPeaklistAt(int row)
@@ -37,21 +42,27 @@ public class PeaklistFilesTableModel extends AbstractTableModel
         return selectedPeaklists;
     }
     
+    public ArrayList<OPeaklist> getAllPeaklists()
+    {
+        return peaklists;
+    }
+    
     public void clear()
     {
         peaklists.clear();
-        fireTableDataChanged();
+        if(this.globalTrigger) fireTableDataChanged();
     }
     
     public void addRow(OPeaklist peaklist)
     {
         addPeaklist(peaklist);
+        if(this.globalTrigger) fireTableDataChanged();
     }
     
     public void removeRow(OPeaklist peaklist)
     {
         peaklists.remove(peaklist);
-        fireTableDataChanged();
+        if(this.globalTrigger) fireTableDataChanged();
     }
     
     @Override
@@ -135,7 +146,7 @@ public class PeaklistFilesTableModel extends AbstractTableModel
                 }
                 break;
         }
-        fireTableCellUpdated(row, col);
+        if(this.globalTrigger) fireTableCellUpdated(row, col);
     }
     
     public void setAllValuesAt(boolean value, int col){
@@ -152,6 +163,6 @@ public class PeaklistFilesTableModel extends AbstractTableModel
                     break;
             }
     	}
-    	fireTableCellUpdated(0, 0);
+    	if(this.globalTrigger) fireTableCellUpdated(0, 0);
     }
 }

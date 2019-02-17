@@ -47,7 +47,7 @@ public class PSuperPeaklistPlot extends JPanel
         {
             OPeaklist peaklist = peaklists.get(i);
             XYIntervalSeries intervalSeries = new XYIntervalSeries(peaklist.toString());
-            for (OPeak peak : peaklist.peaks)
+            for (OPeak peak : peaklist.getPeaks())
             {
                 double shownABSI = peak.absi;
                 if (peaklist.reflex)
@@ -73,6 +73,7 @@ public class PSuperPeaklistPlot extends JPanel
         //
         JFreeChart chart = ChartFactory.createXYBarChart("SuperSpectro", "MASS", false, "INTENSITY", dataset, PlotOrientation.VERTICAL, true, true, true);
         chart.getLegend().setPosition(RectangleEdge.LEFT);
+        chart.getLegend().setVisible(false);
         //
         //
         XYPlot xyPlot = chart.getXYPlot();

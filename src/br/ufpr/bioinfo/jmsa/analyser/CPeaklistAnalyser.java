@@ -18,17 +18,17 @@ public class CPeaklistAnalyser
 	
 	
 	private static Double[][] constructSimMatrix(OPeaklist peaklistA, OPeaklist peaklistB){
-		Double[][] dataA = new Double[2][peaklistA.peaks.size()];
-        Double[][] dataB = new Double[2][peaklistB.peaks.size()];
+		Double[][] dataA = new Double[2][peaklistA.getPeaks().size()];
+        Double[][] dataB = new Double[2][peaklistB.getPeaks().size()];
         
-        for (int i = 0; i < peaklistA.peaks.size(); i++)
+        for (int i = 0; i < peaklistA.getPeaks().size(); i++)
         {
-            dataA[0][i] = peaklistA.peaks.get(i).mass;
+            dataA[0][i] = peaklistA.getPeaks().get(i).mass;
             dataA[1][i] = 1.0;
         }
-        for (int i = 0; i < peaklistB.peaks.size(); i++)
+        for (int i = 0; i < peaklistB.getPeaks().size(); i++)
         {
-            dataB[0][i] = peaklistB.peaks.get(i).mass;
+            dataB[0][i] = peaklistB.getPeaks().get(i).mass;
             dataB[1][i] = 1.0;
         }
         

@@ -56,7 +56,7 @@ public class PPeaklistTable extends JPanel
         //        defaultTableModel.addColumn("TESTE", new Object[] { new Boolean(true), new Boolean(false) });
         //
         //
-        for (OPeak peak : peaklist.peaks)
+        for (OPeak peak : peaklist.getPeaks())
         {
             defaultTableModel.addColumn("", new Object[] {
             	decimalFormat.format(peak.absi),

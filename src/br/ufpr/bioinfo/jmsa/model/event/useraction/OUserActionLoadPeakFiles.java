@@ -12,17 +12,39 @@ import javax.swing.SwingUtilities;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
+import br.ufpr.bioinfo.jmsa.model.event.useraction.OEvento.CallBackEvent;
 import br.ufpr.bioinfo.jmsa.utils.CUtils;
 import br.ufpr.bioinfo.jmsa.view.FMainWindow;
 
 public class OUserActionLoadPeakFiles implements OEvento
 {
+	
     public File[] seletedFolders;
+    public CallBackEvent afterEvent;
+    
+    public boolean incremental = false;
     
     public OUserActionLoadPeakFiles(File[] seletedFolders)
     {
         this.seletedFolders = seletedFolders;
+        this.afterEvent = new CallBackEvent(){
+            public void callback() {
+            	return;
+            }
+        };
     }
+    public OUserActionLoadPeakFiles(File[] seletedFolders, boolean incremental)
+    {
+        this.seletedFolders = seletedFolders;
+        this.incremental = incremental;
+        this.afterEvent = new CallBackEvent(){
+            public void callback() {
+            	return;
+            }
+        };
+    }
+    
+
     
     @Override
     public synchronized void executarEvento()
@@ -32,7 +54,7 @@ public class OUserActionLoadPeakFiles implements OEvento
         //        System.out.println("Iniciando o Loading: " + start);
         //
         //
-        //TODO MALTON: Não utilizar JOptionPane pois pode causar uma inconsistência. Criar um JDialog personalizado
+        //TODO MALTON: Nao utilizar JOptionPane pois pode causar uma inconsistencia. Criar um JDialog personalizado
         Object[] options = { "Cancel" };
         final JOptionPane pane = new JOptionPane("Loading Peaklists", JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, options);
         final JProgressBar progressBar = new JProgressBar(0, 0);
@@ -45,35 +67,33 @@ public class OUserActionLoadPeakFiles implements OEvento
         dialog.add(BorderLayout.SOUTH, pane);
         dialog.setAlwaysOnTop(true);
         dialog.pack();
+        
         //
         //
         //
         //
-        SwingUtilities.invokeLater(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                try
-                {
-                    Thread.sleep(100);
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
-                dialog.setVisible(true);
-            }
-        });
+
+        new Thread(new Runnable() {
+        	@Override
+	        public void run() {
+        		dialog.setVisible(true);
+	        }
+        }).start();
+        
         //
         try
-        {
+        {	
+        	
             if (seletedFolders.length > 0)
             {
+            	FMainWindow.getInstance().setTableTriggerChange(false);
                 progressBar.setIndeterminate(true);
                 progressBar.setValue(0);
                 lblStatusBar.setText("Progress...");
-                FMainWindow.getInstance().clearTable();
+                if(!FMainWindow.getInstance().checkBoxMenuItemIncrementalLoad.isSelected() && !this.incremental) {                	
+                	FMainWindow.getInstance().clearTable(); 
+                }
+                
                 //
                 //
                 ArrayList<File> foundPeakFiles = new ArrayList<File>();
@@ -84,7 +104,7 @@ public class OUserActionLoadPeakFiles implements OEvento
                     {
                         if (!file.isDirectory())
                         {
-                            if (file.getName().endsWith("xml") || file.getName().toLowerCase().endsWith("peaks"))
+                            if (file.getName().endsWith("peaklist.xml") || file.getName().toLowerCase().endsWith("peaks"))
                             {
                                 foundPeakFiles.add(file);
                             }
@@ -135,6 +155,7 @@ public class OUserActionLoadPeakFiles implements OEvento
         }
         catch (InterruptedException e1)
         {
+        	FMainWindow.getInstance().setTableTriggerChange(true);
             e1.printStackTrace();
         }
         catch (Exception e1)
@@ -145,11 +166,21 @@ public class OUserActionLoadPeakFiles implements OEvento
             progressBar.setValue(0);
             lblStatusBar.setText("Progress...");
             FMainWindow.getInstance().clearTable();
+            FMainWindow.getInstance().setTableTriggerChange(true);
         }
         finally
         {
             dialog.dispose();
+            afterEvent.callback();
+            FMainWindow.getInstance().setTableTriggerChange(true);
+            FMainWindow.getInstance().updateTable();
         }
+        FMainWindow.getInstance().lockUpdatePanels = false;
         System.out.println("Finalizando o Loading: " + (System.currentTimeMillis() - start));
+        
     }
+    
 }
+
+
+
