@@ -63,13 +63,12 @@ public class SuperPeaklist extends OPeaklist{
 			}
 		}
 		
-
+		
 		Collections.sort(newPeaklist, new Comparator<OPeak>() {
 	        @Override
 			public int compare(OPeak p1, OPeak p2)
 	        {
-	        	Double result = new Double(p1.mass - p2.mass);
-	            return result.intValue();
+	        	return p1.mass > p2.mass ? 1 : p1.mass < p2.mass ? -1 : 0;
 	        }
 	    });
 		

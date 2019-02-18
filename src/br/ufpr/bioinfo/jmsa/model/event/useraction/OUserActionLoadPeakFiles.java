@@ -73,12 +73,13 @@ public class OUserActionLoadPeakFiles implements OEvento
         //
         //
 
-        new Thread(new Runnable() {
+        Thread dialogThread = new Thread(new Runnable() {
         	@Override
 	        public void run() {
-        		dialog.setVisible(true);
-	        }
-        }).start();
+        		if(dialog.isActive()) dialog.setVisible(true);
+        	}
+        });
+        dialogThread.start();
         
         //
         try
