@@ -97,7 +97,7 @@ public class PPeaklistFiles extends JPanel
     
     public PPeaklistFiles clone() {
     	PPeaklistFiles newCopie = new PPeaklistFiles("DB Manager",this.fmain);
-    	List<OPeaklist> peaklists = fmain.panelLoadingPeaklistFiles.defaultTableModel.getAllPeaklists();
+    	List<OPeaklist> peaklists = this.defaultTableModel.getAllPeaklists();
     	for (OPeaklist peaklist : peaklists){
     		try {
 				OPeaklist copiePeaklist = new OPeaklist(peaklist.peaklistFile);
