@@ -187,14 +187,10 @@ public class PPeaklistFiles extends JPanel
             tableColumnModel.removeColumn(tableColumn);
         }
         //
-        for (int columnsIndex = 0; columnsIndex < columnsToShow.length; columnsIndex++)
-        {
-            if (columnsToShow[columnsIndex])
-            {
-                for (int removedColumnsIndex = 0; removedColumnsIndex < removedColumns.size(); removedColumnsIndex++)
-                {
-                    if (removedColumns.get(removedColumnsIndex).getHeaderValue().equals(defaultTableModel.columnNames[columnsIndex]))
-                    {
+        for (int columnsIndex = 0; columnsIndex < columnsToShow.length; columnsIndex++){
+            if (columnsToShow[columnsIndex]){
+                for (int removedColumnsIndex = 0; removedColumnsIndex < removedColumns.size(); removedColumnsIndex++){
+                    if (removedColumns.get(removedColumnsIndex).getHeaderValue().equals(defaultTableModel.columnNames[columnsIndex])){
                         TableColumn tableColumn = removedColumns.get(removedColumnsIndex);
                         table.getColumnModel().addColumn(tableColumn);
                         removedColumns.remove(removedColumnsIndex);
@@ -277,6 +273,13 @@ public class PPeaklistFiles extends JPanel
     }
     
     public void saveToZIP(String path_to_save) {
+    	List<OPeaklist> peaklists = new ArrayList<>(
+			this.defaultTableModel.getSelectedPeaklists()
+    	);
+    	saveToZIP(path_to_save, peaklists);
+    }
+    
+    public void saveToZIP(String path_to_save, List<OPeaklist> peaklists) {
     	// IMPORTANT: Any modification in this method
     	// can cause an incompatibility of versions on this program
     	// Please, do not change the file names created
@@ -284,9 +287,7 @@ public class PPeaklistFiles extends JPanel
     	try {
     		
     		// The copy is necessary because this list may be changed
-	    	List<OPeaklist> peaklists = new ArrayList<>(
-    			this.defaultTableModel.getSelectedPeaklists()
-	    	);
+	    	
 	    	
 	    	String zipFile = path_to_save;
 			

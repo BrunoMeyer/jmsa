@@ -281,30 +281,6 @@ public class PPeaklistDBManager extends JPanel
     	this.peaklists = peaklists;
     	myContent.removeAll();
     	if(this.peaklists.size() <= 0) return;
-//    	PPeaklistFiles newList = fmain.panelLoadingPeaklistFilesDB.clone();
-//    	newList.setMarkersVisibility(false);
-//    	newList.setGlobalTrigger(false);
-//    	newList.defaultTableModel.addTableModelListener(new TableModelListener()
-//        {
-//            @Override
-//            public void tableChanged(TableModelEvent e)
-//            {
-//
-//                int rowIndex = newList.table.getSelectedRow();
-//                int colIndex = newList.table.getSelectedColumn();
-//                
-//                if(colIndex == 1) {
-//                	OPeaklist peaklist = peaklists.get(rowIndex);
-//                	peaklist.reflex = !peaklist.reflex;
-//                	superSpectro.buildPlot(
-//                			peaklists,
-//                			fmain.checkBoxMenuItemPlotEnableIntensity.isSelected()
-//                	);
-//                	revalidate();
-//                }
-//        
-//            }
-//        });
     	
     	JPanel topPanel = new JPanel();
     	topPanel.setLayout(new GridLayout(1, 2));

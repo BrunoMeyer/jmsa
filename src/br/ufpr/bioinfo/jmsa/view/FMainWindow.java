@@ -86,6 +86,7 @@ public class FMainWindow extends JFrame
     public JTabbedPane tabbedPaneDatabase = new JTabbedPane(JTabbedPane.TOP);
     public PPeaklistFiles panelSpectraPeaklistFiles = new PPeaklistFiles("Spectra", this);
     public PPeaklistFiles panelSpectraPeaklistFilesDB = new PPeaklistFiles("Data Base", this);
+    public PPeaklistFiles panelSpectraPeaklistFilesSE = new PPeaklistFiles("Super Spectra", this);
     public JPanel panelPeaklist = new JPanel();
     public JPanel panelDatabase = new JPanel();
     public JPanel panelPeaklistTablesPlots = new JPanel();
@@ -130,7 +131,7 @@ public class FMainWindow extends JFrame
     public JLabel labelStatusBar = new JLabel("JMSA");
     
     public JButton buttonLoadFiles = new JButton("Load");
-    public JButton buttonSaveDB = new JButton("Save to ZIP");
+    public JButton buttonSaveDBZIP = new JButton("Save to ZIP");
     public JButton buttonLoadDB = new JButton("Load from ZIP");
     
     public JButton buttonPeaklist = new JButton("Peaklist");
@@ -208,7 +209,7 @@ public class FMainWindow extends JFrame
         add(splitPane, BorderLayout.CENTER);
         add(panelStatusBar, BorderLayout.SOUTH);
         toolBar.add(buttonLoadFiles);
-        toolBar.add(buttonSaveDB);
+        toolBar.add(buttonSaveDBZIP);
         toolBar.add(buttonLoadDB);
         toolBar.add(buttonPeaklist);
 //        toolBar.add(buttonAnalyser);
@@ -222,6 +223,7 @@ public class FMainWindow extends JFrame
         splitPane.add(tabbedPaneMain);
         panelStatusBar.add(labelStatusBar, BorderLayout.CENTER);
         tabbedPaneFiles.addTab("Spectra", panelSpectraPeaklistFiles);
+        tabbedPaneFiles.addTab("Super Spectra", panelSpectraPeaklistFilesSE);
         tabbedPaneFiles.addTab("Data Base", panelSpectraPeaklistFilesDB);
 
         tabbedPaneMain.addTab("Peaklist", panelPeaklist);
@@ -285,8 +287,8 @@ public class FMainWindow extends JFrame
                 {
             		if(lockUpdatePanels) return;
             		List<OPeaklist> dbpeaklists = panelSpectraPeaklistFilesDB.defaultTableModel.getSelectedPeaklists();
-	            	List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getSelectedPeaklists();
-	               
+            		List<OPeaklist> peaklists = getLoadingSelectedPeaklists();
+	            	
 	            	if(tabbedPaneDatabase.getSelectedComponent() == panelDBManager) {
 	            		panelDBManager.reloadClassifier(peaklists);
 	            	}
@@ -312,7 +314,7 @@ public class FMainWindow extends JFrame
                 {
             		if(lockUpdatePanels) return;
             		List<OPeaklist> dbpeaklists = panelSpectraPeaklistFilesDB.defaultTableModel.getSelectedPeaklists();
-	            	List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getSelectedPeaklists();
+	            	List<OPeaklist> peaklists = getLoadingSelectedPeaklists();
 	               
 	            	if(tabbedPaneMain.getSelectedComponent() == superPeaklistPlot) {
             			superPeaklistPlot.buildPlot(
@@ -345,8 +347,7 @@ public class FMainWindow extends JFrame
             {
         	try
             {
-                List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getSelectedPeaklists();
-                
+                List<OPeaklist> peaklists = getLoadingSelectedPeaklists();
                 
                 if (tabbedPanePeaklist.getSelectedComponent() == scrollPeaklistTablesPlots)
                 {
@@ -417,9 +418,8 @@ public class FMainWindow extends JFrame
             @Override
             public void actionPerformed(ActionEvent e)
             {
-            	List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getSelectedPeaklists();
+            	List<OPeaklist> peaklists = getLoadingSelectedPeaklists();
             	List<OPeaklist> dbpeaklists = panelSpectraPeaklistFilesDB.defaultTableModel.getSelectedPeaklists();
-            	List<OPeaklist> allpeaklists = panelSpectraPeaklistFiles.defaultTableModel.getAllPeaklists();
             	
             	PPeaklistFiles selectedPanelPeaklistFiles = (PPeaklistFiles)tabbedPaneFiles.getSelectedComponent();
             	JFileChooser chooserSave;
@@ -504,7 +504,7 @@ public class FMainWindow extends JFrame
                         updateVisibleColums();
                         
                         break;
-                    case "savedb":
+                    case "save-db-zip":
                     	// Open the file selector interface
                     	chooserSave = new JFileChooser();
                     	chooserSave.setCurrentDirectory(
@@ -522,11 +522,11 @@ public class FMainWindow extends JFrame
                             	// Get the name of file choosed by user
                             	String file_name_to_save = chooserSave.getSelectedFile().toString();
 
-                            	selectedPanelPeaklistFiles.saveToZIP(file_name_to_save);
+                            	selectedPanelPeaklistFiles.saveToZIP(file_name_to_save, getSelectedPanelPeaks());
                             } catch (Exception err){
                         		err.printStackTrace();
                             }
-                        }  
+                        }
                         break;
                     case "loaddb":
 
@@ -599,10 +599,13 @@ public class FMainWindow extends JFrame
                     case "select-all":
                     	
                     	lockUpdatePanels = true;
-                    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFiles) {
+                    	if(isPeaklistsSelected()) {
                     		panelSpectraPeaklistFiles.defaultTableModel.setAllValuesAt(true, 0);
                     	}
-                    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesDB) {
+                    	if(isSESelected()) {
+                    		panelSpectraPeaklistFilesSE.defaultTableModel.setAllValuesAt(true, 0);
+                    	}
+                    	if(isDBSelected()) {
                     		panelSpectraPeaklistFilesDB.defaultTableModel.setAllValuesAt(true, 0);
                     	}
                     	lockUpdatePanels = false;
@@ -610,10 +613,11 @@ public class FMainWindow extends JFrame
                     	break;
                     case "deselect-all":
                     	lockUpdatePanels = true;
-                    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFiles) {
+                    	if(isLoadingSelected()) {
                     		panelSpectraPeaklistFiles.defaultTableModel.setAllValuesAt(false, 0);
+                    		panelSpectraPeaklistFilesSE.defaultTableModel.setAllValuesAt(true, 0);
                     	}
-                    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesDB) {
+                    	if(isDBSelected()) {
                     		panelSpectraPeaklistFilesDB.defaultTableModel.setAllValuesAt(false, 0);
                     	}
                     	lockUpdatePanels = false;
@@ -676,7 +680,7 @@ public class FMainWindow extends JFrame
         menuItemExit.setActionCommand("exit");
         menuItemAbout.setActionCommand("about");
         buttonLoadFiles.setActionCommand("loadpeakfiles");
-        buttonSaveDB.setActionCommand("savedb");
+        buttonSaveDBZIP.setActionCommand("save-db-zip");
         buttonLoadDB.setActionCommand("loaddb");
         buttonPeaklist.setActionCommand("tab-peaklist");
         buttonAnalyser.setActionCommand("tab-analyser");
@@ -693,7 +697,7 @@ public class FMainWindow extends JFrame
         menuItemExit.addActionListener(actionListener);
         menuItemAbout.addActionListener(actionListener);
         buttonLoadFiles.addActionListener(actionListener);
-        buttonSaveDB.addActionListener(actionListener);
+        buttonSaveDBZIP.addActionListener(actionListener);
         buttonLoadDB.addActionListener(actionListener);
         buttonPeaklist.addActionListener(actionListener);
         buttonAnalyser.addActionListener(actionListener);
@@ -726,51 +730,85 @@ public class FMainWindow extends JFrame
         //        tabbedPanePeaklist.setEnabledAt(tabbedPanePeaklist.indexOfComponent(panelPeaklistSimilarity), false);
         //        tabbedPanePeaklist.setEnabledAt(tabbedPanePeaklist.indexOfComponent(panelPeaklistInformations), false);
     }
+    
+    public boolean isPeaklistsSelected() {
+    	return tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFiles;
+    }
+    public boolean isSESelected() {
+    	return tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesSE;
+    }    
+    public boolean isDBSelected() {
+    	return tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesDB;
+    }
+    public boolean isLoadingSelected() {
+    	return  isPeaklistsSelected() || isSESelected();
+    }
+
+    
+    public List<OPeaklist> getLoadingSelectedPeaklists() {
+    	List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getSelectedPeaklists();
+		List<OPeaklist> superpeaklists = panelSpectraPeaklistFilesSE.defaultTableModel.getSelectedPeaklists();
+    	peaklists.addAll(superpeaklists);
+    	return peaklists;
+    }
+    public List<OPeaklist> getLoadingPeaklists() {
+    	List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getAllPeaklists();
+		List<OPeaklist> superpeaklists = panelSpectraPeaklistFilesSE.defaultTableModel.getAllPeaklists();
+    	peaklists.addAll(superpeaklists);
+    	return peaklists;
+    }
+    
     public void firePeaklistPanelChange() {
-    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFiles) {
+    	if(isPeaklistsSelected()) {
     		panelSpectraPeaklistFiles.defaultTableModel.fireTableDataChanged();
     	}
-    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesDB) {
+    	if(isSESelected()) {
+    		panelSpectraPeaklistFilesSE.defaultTableModel.fireTableDataChanged();
+    	}
+    	if(isDBSelected()) {
     		panelSpectraPeaklistFilesDB.defaultTableModel.fireTableDataChanged();
     	}
     }
     
     public void clearTable()
     {
-    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFiles) {
+    	if(isLoadingSelected()) {
     		panelSpectraPeaklistFiles.clearTable();
+    		panelSpectraPeaklistFilesSE.clearTable();
     	}
-    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesDB) {
+    	if(isDBSelected()) {
     		panelSpectraPeaklistFilesDB.clearTable();
     	}
     }
     
     public void setTableTriggerChange(boolean active)
     {
-    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFiles) {
+    	if(isLoadingSelected()) {
     		panelSpectraPeaklistFiles.defaultTableModel.globalTrigger = active;
+    		panelSpectraPeaklistFilesSE.defaultTableModel.globalTrigger = active;
     	}
-    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesDB) {
+    	if(isDBSelected()) {
     		panelSpectraPeaklistFilesDB.defaultTableModel.globalTrigger = active;
     	}
     }
     
     public void updateTable()
     {
-    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFiles) {
+    	if(isLoadingSelected()){ 
     		panelSpectraPeaklistFiles.defaultTableModel.fireTableDataChanged();
+    		panelSpectraPeaklistFilesSE.defaultTableModel.fireTableDataChanged();
     	}
-    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesDB) {
+    	if(isDBSelected()) {
     		panelSpectraPeaklistFilesDB.defaultTableModel.fireTableDataChanged();
     	}
     }
     
     public void addPeaklistToTable(final OPeaklist peaklist)
     {
-    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFiles) {
-    		panelSpectraPeaklistFiles.addPeaklistToTable(peaklist);
+    	if(isLoadingSelected()) {
+    		addPeaklistToLoadingTable(peaklist);
     	}
-    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesDB) {
+    	if(isDBSelected()) {
     		panelSpectraPeaklistFilesDB.addPeaklistToTable(peaklist);
     		peaklist.selected = true;
     	}
@@ -779,7 +817,12 @@ public class FMainWindow extends JFrame
     
     public void addPeaklistToLoadingTable(final OPeaklist peaklist)
     {
-    	panelSpectraPeaklistFiles.addPeaklistToTable(peaklist);
+    	if(peaklist instanceof SuperPeaklist) {
+			panelSpectraPeaklistFilesSE.addPeaklistToTable(peaklist);
+		}
+		else {
+			panelSpectraPeaklistFiles.addPeaklistToTable(peaklist);
+		}
     }
     
     public void removePeaklistFromDBTable(final OPeaklist peaklist)
@@ -788,7 +831,7 @@ public class FMainWindow extends JFrame
     }
     
     public boolean isInDB(final OPeaklist peaklist) {
-    	List<OPeaklist> peaklists = panelSpectraPeaklistFilesDB.defaultTableModel.getSelectedPeaklists();
+    	List<OPeaklist> peaklists = panelSpectraPeaklistFilesDB.defaultTableModel.getAllPeaklists();
     	for(OPeaklist p : peaklists ) {
     		if(p == peaklist)
     			return true;
@@ -798,7 +841,7 @@ public class FMainWindow extends JFrame
     }
     
     public boolean isInLoad(final OPeaklist peaklist) {
-    	List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getSelectedPeaklists();
+    	List<OPeaklist> peaklists = getLoadingPeaklists();
     	for(OPeaklist p : peaklists ) {
     		if(p == peaklist)
     			return true;
@@ -808,10 +851,10 @@ public class FMainWindow extends JFrame
     }
     
     public List<OPeaklist> getSelectedPanelPeaks(){
-    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFiles) {
-    		return panelSpectraPeaklistFiles.defaultTableModel.getAllPeaklists();
+    	if(isLoadingSelected()) {
+    		return getLoadingPeaklists();
     	}
-    	if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesDB) {
+    	if(isDBSelected()) {
     		return panelSpectraPeaklistFilesDB.defaultTableModel.getAllPeaklists();
     	}
     	
@@ -819,7 +862,7 @@ public class FMainWindow extends JFrame
     }
     
     public OPeaklist getSelectedPanelPeakById(String id) {
-    	List<OPeaklist> peaklists = this.getSelectedPanelPeaks();
+    	List<OPeaklist> peaklists = getSelectedPanelPeaks();
     	for(OPeaklist p : peaklists ) {
     		if(p.toString().equals(id)) return p;
     	}
@@ -832,6 +875,12 @@ public class FMainWindow extends JFrame
         		checkBoxMenuItemShowMSSpecies.isSelected(),
         		checkBoxMenuItemShowMSStrain.isSelected()
         );
+    	panelSpectraPeaklistFilesSE.setVisibleColumns(
+        		checkBoxMenuItemShowMSName.isSelected(),
+        		checkBoxMenuItemShowMSSpectrumID.isSelected(),
+        		checkBoxMenuItemShowMSSpecies.isSelected(),
+        		checkBoxMenuItemShowMSStrain.isSelected()
+        );
         panelSpectraPeaklistFilesDB.setVisibleColumns(
         		checkBoxMenuItemShowMSName.isSelected(),
         		checkBoxMenuItemShowMSSpectrumID.isSelected(),
@@ -839,7 +888,7 @@ public class FMainWindow extends JFrame
         		checkBoxMenuItemShowMSStrain.isSelected()
         );
         
-        if(tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesDB) {
+        if(isDBSelected()) {
         	panelSpectraPeaklistFilesDB.setMarkersVisibility(false);
     	}
     }
