@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,6 +22,9 @@ import br.ufpr.bioinfo.jmsa.view.core.PPeaklistTable;
 
 public class OPeaklist
 {
+	private static final AtomicInteger countId = new AtomicInteger(0);
+	public int id;
+	
     public boolean valid = false;
     //
     public File peaklistFile;
@@ -62,6 +67,8 @@ public class OPeaklist
             int b = hash & 0x0000FF;
             spectrumForegroundColor = new Color(r, g, b);
             spectrumBackgroundColor = new Color(255 - r, 255 - g, 255 - b);
+            
+            id = countId.incrementAndGet();
         }
         else
         {

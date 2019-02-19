@@ -79,6 +79,7 @@ public class FMainWindow extends JFrame
     public JScrollPane scrollPeaklistPlots = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     public JScrollPane scrollPeaklistClassifier = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     public JScrollPane scrollPeaklistDBManager = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+    public JScrollPane scrollPeaklistInformations = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     public JTabbedPane tabbedPaneFiles = new JTabbedPane(JTabbedPane.TOP);
     public JTabbedPane tabbedPaneMain = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
     public JTabbedPane tabbedPanePeaklist = new JTabbedPane(JTabbedPane.TOP);
@@ -239,13 +240,13 @@ public class FMainWindow extends JFrame
         tabbedPanePeaklist.addTab("Groups", panelPeaklistGroups);
         tabbedPanePeaklist.addTab("Similarity", panelPeaklistSimilarity);
 //        tabbedPanePeaklist.addTab("Cluster", panelPeaklistCluster);
-        tabbedPanePeaklist.addTab("Informations", panelPeaklistInformations);
+        tabbedPanePeaklist.addTab("Informations", scrollPeaklistInformations);
         
-        tabbedPaneDatabase.addTab("DB search", panelClassifier);
-        tabbedPaneDatabase.addTab("DB Manager", panelDBManager);
+        tabbedPaneDatabase.addTab("Search", panelClassifier);
+        tabbedPaneDatabase.addTab("Manager", panelDBManager);
         
         scrollPeaklistTablesPlots.setViewportView(panelPeaklistTablesPlots);
-        
+        scrollPeaklistInformations.setViewportView(panelPeaklistInformations);
         scrollPeaklistTables.setViewportView(panelPeaklistTables);
         scrollPeaklistPlots.setViewportView(panelPeaklistPlots);
         
@@ -388,7 +389,7 @@ public class FMainWindow extends JFrame
                     
                     panelPeaklistSimilarity.add(similarityMatrix);
                 }
-                else if (tabbedPanePeaklist.getSelectedComponent() == panelPeaklistInformations)
+                else if (tabbedPanePeaklist.getSelectedComponent() == scrollPeaklistInformations)
                 {
                     panelPeaklistInformations.removeAll();
                     for (OPeaklist peaklist : peaklists)
@@ -396,7 +397,7 @@ public class FMainWindow extends JFrame
                         panelPeaklistInformations.add(peaklist.getPeaklistInfo());
                         //
                         //Break to show only the first selected
-                        break;
+                        //break;
                     }
                 }
                 //
