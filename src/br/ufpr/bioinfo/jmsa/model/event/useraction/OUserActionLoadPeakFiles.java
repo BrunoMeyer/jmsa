@@ -96,8 +96,8 @@ public class OUserActionLoadPeakFiles implements OEvento
                 progressBar.setIndeterminate(true);
                 progressBar.setValue(0);
                 lblStatusBar.setText("Progress...");
-                if(!FMainWindow.getInstance().checkBoxMenuItemIncrementalLoad.isSelected() && !this.incremental) {                	
-                	FMainWindow.getInstance().clearTable(); 
+                if(!(FMainWindow.getInstance().checkBoxMenuItemIncrementalLoad.isSelected() || this.incremental)) {                	
+                	FMainWindow.getInstance().clearTable();
                 }
                 
                 //
@@ -171,7 +171,9 @@ public class OUserActionLoadPeakFiles implements OEvento
             progressBar.setMaximum(0);
             progressBar.setValue(0);
             lblStatusBar.setText("Progress...");
-            FMainWindow.getInstance().clearTable();
+            if(!(FMainWindow.getInstance().checkBoxMenuItemIncrementalLoad.isSelected() || this.incremental)) {
+            	FMainWindow.getInstance().clearTable();
+            }
             FMainWindow.getInstance().setTableTriggerChange(true);
         }
         finally

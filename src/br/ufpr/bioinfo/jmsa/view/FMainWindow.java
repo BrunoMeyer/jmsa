@@ -528,7 +528,7 @@ public class FMainWindow extends JFrame
                             }
                         }
                         break;
-                    case "loaddb":
+                    case "load-from-zip":
 
                     	// Open the file selector interface
                     	chooserSave = new JFileChooser();
@@ -543,7 +543,6 @@ public class FMainWindow extends JFrame
                         
                         if (chooserSave.showOpenDialog(FMainWindow.this) == JFileChooser.APPROVE_OPTION) {
                         	lockUpdatePanels = true;
-                        	FMainWindow.getInstance().clearTable();
                         	// When the user choose a file name and directory to save
                             try {
                             	for(File f : chooserSave.getSelectedFiles()) {
@@ -681,7 +680,7 @@ public class FMainWindow extends JFrame
         menuItemAbout.setActionCommand("about");
         buttonLoadFiles.setActionCommand("loadpeakfiles");
         buttonSaveDBZIP.setActionCommand("save-db-zip");
-        buttonLoadDB.setActionCommand("loaddb");
+        buttonLoadDB.setActionCommand("load-from-zip");
         buttonPeaklist.setActionCommand("tab-peaklist");
         buttonAnalyser.setActionCommand("tab-analyser");
         buttonCluster.setActionCommand("tab-cluster");

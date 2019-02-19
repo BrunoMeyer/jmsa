@@ -211,7 +211,26 @@ public class PPeaklistFiles extends JPanel
     	);
     }
     
-    private void createFileOnZIP(
+    
+    // Just add an unique file to an ZipOutputStream
+    private void addFileToZIP(String file_name, String file_path, ZipOutputStream zos, byte[] buffer) throws IOException{
+    	ZipEntry ze;
+		ze = new ZipEntry(file_path);
+		zos.putNextEntry(ze);
+			
+		FileInputStream in = new FileInputStream(file_name);
+		
+		// This is needed to create the zip file
+		// The size of buffer defined before can be a future problem
+		int len;
+		while ((len = in.read(buffer)) > 0) {
+			zos.write(buffer, 0, len);
+		}
+		in.close();
+    }
+    
+    // Add an peaklist file to ZIP and this JMSA info if exists
+    private void createPeaklistOnZIP(
     		OPeaklist peaklist, ZipOutputStream zos,
     		byte[] buffer, JSONArray peaklists_json_array,
     		JSONArray superpeaks_json_array
@@ -233,32 +252,29 @@ public class PPeaklistFiles extends JPanel
 			
 			for (OPeaklist sp_peaklist : sp.peaklists){
 				sp_peaklists_json_array.add(sp_peaklist.spectrumid.toString());
-				createFileOnZIP(sp_peaklist, zos, buffer, peaklists_json_array, superpeaks_json_array);
+				createPeaklistOnZIP(sp_peaklist, zos, buffer, peaklists_json_array, superpeaks_json_array);
 			}
 			
 		}
 		else {
-			ZipEntry ze;
-	    	String file_name = peaklist.peaklistFile.toString();
+			
+			String file_name = peaklist.peaklistFile.toString();
 			String file_path = 
 					"files"+File.separator+peaklist.spectrumid.toString()+File.separator+"peaklist.xml";
-			ze = new ZipEntry(file_path);
-			zos.putNextEntry(ze);
 			
+			addFileToZIP(file_name, file_path, zos, buffer);
+			
+			if(peaklist.peaklistJMSAINFOFile.exists()) {
+				file_path = 
+						"files"+File.separator+peaklist.spectrumid.toString()+File.separator+"peaklist.xml.jmsainfo";
+				String file_name_info = peaklist.peaklistJMSAINFOFile.toString();
+				addFileToZIP(file_name_info, file_path, zos, buffer);
+			}
+				
 			JSONObject peak_obj = new JSONObject();
-			
 			peak_obj.put("id", peaklist.spectrumid.toString());
 			peak_obj.put("path", file_path);
 			
-			FileInputStream in = new FileInputStream(file_name);
-			
-			// This is needed to create the zip file
-			// The size of buffer defined before can be a future problem
-			int len;
-			while ((len = in.read(buffer)) > 0) {
-				zos.write(buffer, 0, len);
-			}
-			in.close();
 			peaklists_json_array.add(peak_obj);
 		}
     }
@@ -322,7 +338,7 @@ public class PPeaklistFiles extends JPanel
 			// If the peaklist instance was an superspectre, just add it on json file
 			
 			for (OPeaklist peaklist : peaklists){
-				createFileOnZIP(peaklist, zos, buffer, peaklists_json_array, superpeaks_json_array);
+				createPeaklistOnZIP(peaklist, zos, buffer, peaklists_json_array, superpeaks_json_array);
 			}
 			
 	
@@ -477,13 +493,6 @@ public class PPeaklistFiles extends JPanel
             peaksLoader.executarEvento();
             FMainWindow.getInstance().updateVisibleColums();
             
-//            SwingUtilities.invokeLater(new Runnable()
-//            {
-//                public void run()
-//                {
-//                	
-//                }
-//            });
 
         } catch (IOException e) {
             e.printStackTrace();
