@@ -448,7 +448,7 @@ public class PPeaklistFiles extends JPanel
             fis.close();
             final JSONArray super_peaks = super_peaks_file;
             OUserActionLoadPeakFiles peaksLoader = new OUserActionLoadPeakFiles(
-        		new File[] {dir}, true
+        		new File[] {dir}
             );
             
             PPeaklistFiles me = this;
