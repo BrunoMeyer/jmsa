@@ -53,10 +53,11 @@ public class PPeaklistFiles extends JPanel
     public FMainWindow fmain;
     public boolean globalTrigger = true;
     
-    
+    public int next_peak_id;
     public PPeaklistFiles(String title, FMainWindow fmain)
     {
     	this.fmain = fmain;
+    	this.next_peak_id = 1;
         setLayout(new BorderLayout(2, 2));
         //
         //
@@ -117,6 +118,7 @@ public class PPeaklistFiles extends JPanel
     
     public void clearTable()
     {
+    	next_peak_id = 1;
 //        SwingUtilities.invokeLater(new Runnable()
 //        {
 //            public void run()
@@ -135,6 +137,7 @@ public class PPeaklistFiles extends JPanel
     
     public void addPeaklistToTable(final OPeaklist peaklist)
     {
+    	peaklist.panel_id = next_peak_id++;
 //        SwingUtilities.invokeLater(new Runnable()
 //        {
 //            public void run()
@@ -176,7 +179,7 @@ public class PPeaklistFiles extends JPanel
     
     public void setVisibleColumns(boolean showName, boolean showSpectrumID, boolean showSpecies, boolean showStrain)
     {
-        Boolean[] columnsToShow = new Boolean[] { this.showMarkers, this.showMarkers, showName, showSpectrumID, showSpecies, showStrain };
+        Boolean[] columnsToShow = new Boolean[] { true, this.showMarkers, this.showMarkers, showName, showSpectrumID, showSpecies, showStrain };
         //
         
         TableColumnModel tableColumnModel = table.getColumnModel();

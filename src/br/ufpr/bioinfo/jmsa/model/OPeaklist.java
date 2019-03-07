@@ -23,7 +23,7 @@ import br.ufpr.bioinfo.jmsa.view.core.PPeaklistTable;
 public class OPeaklist
 {
 	private static final AtomicInteger countId = new AtomicInteger(0);
-	public int id;
+	public int panel_id;
 	
     public boolean valid = false;
     //
@@ -68,7 +68,7 @@ public class OPeaklist
             spectrumForegroundColor = new Color(r, g, b);
             spectrumBackgroundColor = new Color(255 - r, 255 - g, 255 - b);
             
-            id = countId.incrementAndGet();
+            panel_id = countId.incrementAndGet();
         }
         else
         {

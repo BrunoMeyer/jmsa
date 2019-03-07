@@ -189,7 +189,7 @@ public class PPeaklistInfo extends JPanel implements ActionListener
     public void readConfig()
     {
         textSpectrumID.setText(peaklist.spectrumid);
-        textTempID.setText(Integer.toString(peaklist.id));
+        textTempID.setText(Integer.toString(peaklist.panel_id));
         textDate.setText(peaklist.date);
         textShots.setText(peaklist.shots);
         textCreator.setText(peaklist.creator);

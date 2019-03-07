@@ -7,7 +7,7 @@ import br.ufpr.bioinfo.jmsa.model.OPeaklist;
 public class PeaklistFilesTableModel extends AbstractTableModel
 {
     private ArrayList<OPeaklist> peaklists = new ArrayList<OPeaklist>();
-    public String[] columnNames = new String[] { "Selected", "Reflex", "TemporaryID", "Name", "SpectrumID", "Species", "Strain" };
+    public String[] columnNames = new String[] { "TemporaryID", "Selected", "Reflex", "Name", "SpectrumID", "Species", "Strain" };
     public boolean globalTrigger = true;
     public PeaklistFilesTableModel()
     {
@@ -98,13 +98,13 @@ public class PeaklistFilesTableModel extends AbstractTableModel
             switch (columnIndex)
             {
             	case 0:
-                    value = peaklist.selected;
+                    value = peaklist.panel_id;
                     break;
                 case 1:
-                    value = peaklist.reflex;
+                    value = peaklist.selected;
                     break;
                 case 2:
-            		value = peaklist.id;
+            		value = peaklist.reflex;
             		break;
                 case 3:
                     value = peaklist.jmsainfoName;
@@ -128,7 +128,8 @@ public class PeaklistFilesTableModel extends AbstractTableModel
     
     public boolean isCellEditable(int row, int col)
     {
-        return (col < 2);
+    	// Only reflex and select columns must be editable
+        return (col < 3 && col > 0);
     }
     
     public void setValueAt(Object value, int row, int col)
@@ -136,13 +137,13 @@ public class PeaklistFilesTableModel extends AbstractTableModel
         OPeaklist peaklist = peaklists.get(row);
         switch (col)
         {
-            case 0:
+            case 1:
                 if (value.getClass() == Boolean.class)
                 {
                     peaklist.selected = (Boolean) value;
                 }
                 break;
-            case 1:
+            case 2:
                 if (value.getClass() == Boolean.class)
                 {
                     peaklist.reflex = (Boolean) value;
