@@ -179,6 +179,7 @@ public class OUserActionLoadPeakFiles implements OEvento
         finally
         {
             dialog.dispose();
+            FMainWindow.getInstance().tabbedPaneMain.setSelectedComponent(FMainWindow.getInstance().panelPeaklist);
             afterEvent.callback();
             FMainWindow.getInstance().setTableTriggerChange(true);
             FMainWindow.getInstance().updateTable();

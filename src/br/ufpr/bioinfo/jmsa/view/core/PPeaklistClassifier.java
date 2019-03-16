@@ -27,7 +27,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
-import com.sun.corba.se.spi.orbutil.fsm.Action;
+//import com.sun.corba.se.spi.orbutil.fsm.Action;
 
 import br.ufpr.bioinfo.jmsa.analyser.CPeaklistAnalyser;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;

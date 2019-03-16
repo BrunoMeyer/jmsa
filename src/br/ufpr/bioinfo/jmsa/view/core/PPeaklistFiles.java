@@ -454,7 +454,6 @@ public class PPeaklistFiles extends JPanel
         		new File[] {dir}
             );
             
-            PPeaklistFiles me = this;
             CallBackEvent afterLoadPeaklists = new CallBackEvent(){
                 public void callback() {
                 	if(super_peaks != null) {
@@ -511,7 +510,7 @@ class PeaklistFilesTableStringCellRenderer extends DefaultTableCellRenderer
         PeaklistFilesTableModel model = (PeaklistFilesTableModel) table.getModel();
         OPeaklist peaklist = model.getPeaklistAt(row);
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        c.setForeground(peaklist.spectrumForegroundColor);
+        if(peaklist != null) c.setForeground(peaklist.spectrumForegroundColor);
         return c;
     }
 }
