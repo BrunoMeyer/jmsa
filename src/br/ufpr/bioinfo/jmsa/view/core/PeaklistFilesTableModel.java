@@ -6,7 +6,7 @@ import br.ufpr.bioinfo.jmsa.model.OPeaklist;
 
 public class PeaklistFilesTableModel extends AbstractTableModel
 {
-    private ArrayList<OPeaklist> peaklists = new ArrayList<OPeaklist>();
+    public ArrayList<OPeaklist> peaklists = new ArrayList<OPeaklist>();
     public String[] columnNames = new String[] { "TemporaryID", "Selected", "Reflex", "Name", "SpectrumID", "Species", "Strain" };
     public boolean globalTrigger = true;
     public PeaklistFilesTableModel()
@@ -26,6 +26,7 @@ public class PeaklistFilesTableModel extends AbstractTableModel
     
     public OPeaklist getPeaklistAt(int row)
     {
+    	if(peaklists.size()-1 < row) return null;
         return peaklists.get(row);
     }
     
@@ -132,7 +133,7 @@ public class PeaklistFilesTableModel extends AbstractTableModel
         return (col < 3 && col > 0);
     }
     
-    public void setValueAt(Object value, int row, int col)
+    public void setValueAt(Object value, int row, int col, boolean trigger)
     {
         OPeaklist peaklist = peaklists.get(row);
         switch (col)
@@ -150,23 +151,18 @@ public class PeaklistFilesTableModel extends AbstractTableModel
                 }
                 break;
         }
-        if(this.globalTrigger) fireTableCellUpdated(row, col);
+        if(this.globalTrigger && trigger) fireTableCellUpdated(row, col);
+    }
+    
+    public void setValueAt(Object value, int row, int col) {
+    	setValueAt(value, row, col, true);
     }
     
     public void setAllValuesAt(boolean value, int col){
     	int row;
-    	for(row = 0; row < peaklists.size(); row++){
-    		OPeaklist peaklist = peaklists.get(row);
-            switch (col)
-            {
-                case 0:
-                    peaklist.selected = (Boolean) value;
-                    break;
-                case 1:
-                    peaklist.reflex = (Boolean) value;  
-                    break;
-            }
+    	for(row = 0; row < peaklists.size()-1; row++){
+    		setValueAt(value, row, col, false);
     	}
-    	if(this.globalTrigger) fireTableCellUpdated(0, 0);
+    	setValueAt(value, row, col, true);
     }
 }

@@ -39,7 +39,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import com.sun.corba.se.spi.orbutil.fsm.Action;
+//import com.sun.corba.se.spi.orbutil.fsm.Action;
 
 import br.ufpr.bioinfo.jmsa.analyser.CPeaklistAnalyser;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;

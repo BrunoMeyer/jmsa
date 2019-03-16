@@ -529,7 +529,6 @@ public class FMainWindow extends JFrame
                         }
                         break;
                     case "load-from-zip":
-
                     	// Open the file selector interface
                     	chooserSave = new JFileChooser();
                     	chooserSave.setCurrentDirectory(
@@ -542,6 +541,7 @@ public class FMainWindow extends JFrame
                     	if(lockUpdatePanels) break;
                         
                         if (chooserSave.showOpenDialog(FMainWindow.this) == JFileChooser.APPROVE_OPTION) {
+                        	tabbedPaneMain.setSelectedComponent(panelPeaklist);
                         	lockUpdatePanels = true;
                         	// When the user choose a file name and directory to save
                             try {
@@ -596,31 +596,10 @@ public class FMainWindow extends JFrame
                         tabbedPaneMain.setSelectedComponent(panelInformation);
                         break;
                     case "select-all":
-                    	
-                    	lockUpdatePanels = true;
-                    	if(isPeaklistsSelected()) {
-                    		panelSpectraPeaklistFiles.defaultTableModel.setAllValuesAt(true, 0);
-                    	}
-                    	if(isSESelected()) {
-                    		panelSpectraPeaklistFilesSE.defaultTableModel.setAllValuesAt(true, 0);
-                    	}
-                    	if(isDBSelected()) {
-                    		panelSpectraPeaklistFilesDB.defaultTableModel.setAllValuesAt(true, 0);
-                    	}
-                    	lockUpdatePanels = false;
-                    	firePeaklistPanelChange();
+                    	setAllSelectedValue(true);
                     	break;
                     case "deselect-all":
-                    	lockUpdatePanels = true;
-                    	if(isLoadingSelected()) {
-                    		panelSpectraPeaklistFiles.defaultTableModel.setAllValuesAt(false, 0);
-                    		panelSpectraPeaklistFilesSE.defaultTableModel.setAllValuesAt(true, 0);
-                    	}
-                    	if(isDBSelected()) {
-                    		panelSpectraPeaklistFilesDB.defaultTableModel.setAllValuesAt(false, 0);
-                    	}
-                    	lockUpdatePanels = false;
-                    	firePeaklistPanelChange();
+                    	setAllSelectedValue(false);
                     	break;
                     
                     case "export-csv":
@@ -742,7 +721,18 @@ public class FMainWindow extends JFrame
     public boolean isLoadingSelected() {
     	return  isPeaklistsSelected() || isSESelected();
     }
-
+    
+    public void setAllSelectedValue(boolean value){
+    	lockUpdatePanels = true;
+    	if(isPeaklistsSelected() && panelSpectraPeaklistFiles.defaultTableModel.peaklists.size() > 0) {
+			panelSpectraPeaklistFiles.defaultTableModel.setAllValuesAt(value, 1);
+    	}
+    	if(isSESelected() && panelSpectraPeaklistFilesSE.defaultTableModel.peaklists.size() > 0) {
+    		panelSpectraPeaklistFilesSE.defaultTableModel.setAllValuesAt(value, 1);
+    	}
+    	lockUpdatePanels = false;
+    	firePeaklistPanelChange();
+    }
     
     public List<OPeaklist> getLoadingSelectedPeaklists() {
     	List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getSelectedPeaklists();
