@@ -596,27 +596,10 @@ public class FMainWindow extends JFrame
                         tabbedPaneMain.setSelectedComponent(panelInformation);
                         break;
                     case "select-all":
-                    	
-                    	lockUpdatePanels = true;
-                    	if(isPeaklistsSelected() && panelSpectraPeaklistFiles.defaultTableModel.peaklists.size() > 0) {
-                			panelSpectraPeaklistFiles.defaultTableModel.setAllValuesAt(true, 1);
-                    	}
-                    	if(isSESelected() && panelSpectraPeaklistFilesSE.defaultTableModel.peaklists.size() > 0) {
-                    		panelSpectraPeaklistFilesSE.defaultTableModel.setAllValuesAt(true, 1);
-                    	}
-                    	lockUpdatePanels = false;
-                    	firePeaklistPanelChange();
+                    	setAllSelectedValue(true);
                     	break;
                     case "deselect-all":
-                    	lockUpdatePanels = true;
-                    	if(isPeaklistsSelected() && panelSpectraPeaklistFiles.defaultTableModel.peaklists.size() > 0) {
-                			panelSpectraPeaklistFiles.defaultTableModel.setAllValuesAt(false, 1);
-                    	}
-                    	if(isSESelected() && panelSpectraPeaklistFilesSE.defaultTableModel.peaklists.size() > 0) {
-                    		panelSpectraPeaklistFilesSE.defaultTableModel.setAllValuesAt(false, 1);
-                    	}
-                    	lockUpdatePanels = false;
-                    	firePeaklistPanelChange();
+                    	setAllSelectedValue(false);
                     	break;
                     
                     case "export-csv":
@@ -738,7 +721,18 @@ public class FMainWindow extends JFrame
     public boolean isLoadingSelected() {
     	return  isPeaklistsSelected() || isSESelected();
     }
-
+    
+    public void setAllSelectedValue(boolean value){
+    	lockUpdatePanels = true;
+    	if(isPeaklistsSelected() && panelSpectraPeaklistFiles.defaultTableModel.peaklists.size() > 0) {
+			panelSpectraPeaklistFiles.defaultTableModel.setAllValuesAt(value, 1);
+    	}
+    	if(isSESelected() && panelSpectraPeaklistFilesSE.defaultTableModel.peaklists.size() > 0) {
+    		panelSpectraPeaklistFilesSE.defaultTableModel.setAllValuesAt(value, 1);
+    	}
+    	lockUpdatePanels = false;
+    	firePeaklistPanelChange();
+    }
     
     public List<OPeaklist> getLoadingSelectedPeaklists() {
     	List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getSelectedPeaklists();
@@ -859,7 +853,7 @@ public class FMainWindow extends JFrame
     public OPeaklist getSelectedPanelPeakById(String id) {
     	List<OPeaklist> peaklists = getSelectedPanelPeaks();
     	for(OPeaklist p : peaklists ) {
-    		if(p.toString().equals(id)) return p;
+    		if(p.spectrumid.equals(id)) return p;
     	}
     	return null;
     }
