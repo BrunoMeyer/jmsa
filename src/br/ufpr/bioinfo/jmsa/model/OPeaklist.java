@@ -2,6 +2,9 @@ package br.ufpr.bioinfo.jmsa.model;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -10,6 +13,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.ini4j.Wini;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -41,6 +47,7 @@ public class OPeaklist
     public String jmsainfoSpecie = "";
     public String jmsainfoStrain = "";
     public String jmsainfoNotes = "";
+    public String jmsainfoDNA = "";
     //
     //
     //Presentation attributes
@@ -178,22 +185,33 @@ public class OPeaklist
     
     public void readJMSAINFO()
     {
+    	
         peaklistJMSAINFOFile = new File(peaklistFile.getAbsolutePath() + ".jmsainfo");
         //
         if (peaklistJMSAINFOFile.exists())
         {
-            try
+        	try (FileReader reader = new FileReader(peaklistFile.getAbsolutePath() + ".jmsainfo"))
             {
-                Wini wini = new Wini(peaklistJMSAINFOFile);
-                jmsainfoName = wini.get("jmsainfo", "jmsainfoName", String.class);
-                jmsainfoSpecie = wini.get("jmsainfo", "jmsainfoSpecie", String.class);
-                jmsainfoStrain = wini.get("jmsainfo", "jmsainfoStrain", String.class);
-                jmsainfoNotes = wini.get("jmsainfo", "jmsainfoNotes", String.class);
-            }
-            catch (Exception e)
-            {
+                //Read JSON file
+        		JSONParser jsonParser = new JSONParser();
+                Object obj = jsonParser.parse(reader);
+     
+                JSONObject json_info = (JSONObject) obj;
+                
+                jmsainfoName = (String) json_info.get("jmsainfoName");
+                jmsainfoSpecie = (String) json_info.get("jmsainfoSpecie");
+                jmsainfoStrain = (String) json_info.get("jmsainfoStrain");
+                jmsainfoNotes = (String) json_info.get("jmsainfoNotes");
+                jmsainfoDNA = (String) json_info.get("DNA");
+     
+            } catch (FileNotFoundException e) {
+                // e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
                 e.printStackTrace();
             }
+        	
         }
     }
     
@@ -205,12 +223,30 @@ public class OPeaklist
             {
                 peaklistJMSAINFOFile.createNewFile();
             }
-            Wini wini = new Wini(peaklistJMSAINFOFile);
-            wini.put("jmsainfo", "jmsainfoName", jmsainfoName);
-            wini.put("jmsainfo", "jmsainfoSpecie", jmsainfoSpecie);
-            wini.put("jmsainfo", "jmsainfoStrain", jmsainfoStrain);
-            wini.put("jmsainfo", "jmsainfoNotes", jmsainfoNotes);
-            wini.store();
+            JSONObject jmsa_info = new JSONObject();
+            
+            jmsa_info.put("jmsainfoName", jmsainfoName);
+            jmsa_info.put("jmsainfoSpecie", jmsainfoSpecie);
+            jmsa_info.put("jmsainfoStrain", jmsainfoStrain);
+            jmsa_info.put("jmsainfoNotes", jmsainfoNotes);
+            jmsa_info.put("DNA", jmsainfoDNA);
+            
+            //Write JSON file
+            try (FileWriter file = new FileWriter(peaklistFile.getAbsolutePath() + ".jmsainfo")) {
+            	
+            	// Identation level equal to 4
+            	// TODO: Import new libraries and import pretty print json functions
+            	String str = jmsa_info.toJSONString();
+            	str = str.replaceAll("\\{", "\\{\n    ");
+            	str = str.replaceAll(",", ",\n    ");
+            	str = str.replaceAll("\"\\}", "\"\n\\}");
+            	file.write(str);
+                
+                file.flush();
+     
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         catch (Exception e)
         {
