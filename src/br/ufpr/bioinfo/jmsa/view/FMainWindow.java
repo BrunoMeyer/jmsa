@@ -60,6 +60,7 @@ import br.ufpr.bioinfo.jmsa.view.core.PPeaklistDBManager;
 
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistDendrogram;
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistFiles;
+import br.ufpr.bioinfo.jmsa.view.core.PPeaklistAction;
 import br.ufpr.bioinfo.jmsa.view.core.SIconUtil;
 
 
@@ -95,6 +96,7 @@ public class FMainWindow extends JFrame
     public JPanel panelPeaklistProteins = new JPanel();
     public JPanel panelPeaklistGroups = new JPanel();
     public JPanel panelPeaklistSimilarity = new JPanel();
+    public JPanel panelPeaklistAction = new JPanel();
     public JScrollPane panelPeaklistCluster = new JScrollPane();
     public JPanel panelPeaklistClassifier = new JPanel();
     public JPanel panelPeaklistDBManager = new JPanel();
@@ -146,6 +148,8 @@ public class FMainWindow extends JFrame
     
     public PPeaklistSimilarity similarityMatrix;
     
+    public PPeaklistAction infoAction;
+    
     public boolean lockUpdatePanels = false;
     
     public static FMainWindow getInstance()
@@ -171,6 +175,7 @@ public class FMainWindow extends JFrame
         panelPeaklistTables.setLayout(new BoxLayout(panelPeaklistTables, BoxLayout.Y_AXIS));
         panelPeaklistPlots.setLayout(new BoxLayout(panelPeaklistPlots, BoxLayout.Y_AXIS));
         panelPeaklistSimilarity.setLayout(new BoxLayout(panelPeaklistSimilarity, BoxLayout.Y_AXIS));
+        panelPeaklistAction.setLayout(new BoxLayout(panelPeaklistAction, BoxLayout.Y_AXIS));
         panelPeaklistInformations.setLayout(new BoxLayout(panelPeaklistInformations, BoxLayout.Y_AXIS));
         panelCluster.setLayout(new BorderLayout(2, 2));
         panelClassifier.setLayout(new BorderLayout(2, 2));
@@ -243,6 +248,7 @@ public class FMainWindow extends JFrame
         tabbedPanePeaklist.addTab("Similarity", panelPeaklistSimilarity);
 //        tabbedPanePeaklist.addTab("Cluster", panelPeaklistCluster);
         tabbedPanePeaklist.addTab("Informations", scrollPeaklistInformations);
+        tabbedPanePeaklist.addTab("Peaklists Action", panelPeaklistAction);
         
         tabbedPaneDatabase.addTab("Search", panelClassifier);
         tabbedPaneDatabase.addTab("Manager", panelDBManager);
@@ -392,14 +398,13 @@ public class FMainWindow extends JFrame
                 }
                 else if (tabbedPanePeaklist.getSelectedComponent() == scrollPeaklistInformations)
                 {
-                    panelPeaklistInformations.removeAll();
-                    for (OPeaklist peaklist : peaklists)
-                    {
-                        panelPeaklistInformations.add(peaklist.getPeaklistInfo());
-                        //
-                        //Break to show only the first selected
-                        //break;
-                    }
+                    updatePeaklistInformationPanel(peaklists);
+                }
+                else if (tabbedPanePeaklist.getSelectedComponent() == panelPeaklistAction)
+                {
+                    panelPeaklistAction.removeAll();
+                    infoAction = new PPeaklistAction(peaklists);
+                    panelPeaklistAction.add(infoAction);
                 }
                 //
                 repaint();
@@ -880,6 +885,17 @@ public class FMainWindow extends JFrame
         if(isDBSelected()) {
         	panelSpectraPeaklistFilesDB.setMarkersVisibility(false);
     	}
+    }
+
+    public void updatePeaklistInformationPanel(List<OPeaklist> peaklists){
+        panelPeaklistInformations.removeAll();
+        for (OPeaklist peaklist : peaklists)
+        {
+            panelPeaklistInformations.add(peaklist.getPeaklistInfo());
+            //
+            //Break to show only the first selected
+            //break;
+        }
     }
     
 }

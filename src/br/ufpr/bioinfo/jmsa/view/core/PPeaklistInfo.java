@@ -1,4 +1,5 @@
 package br.ufpr.bioinfo.jmsa.view.core;
+import br.ufpr.bioinfo.jmsa.view.FMainWindow;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -239,6 +240,7 @@ public class PPeaklistInfo extends JPanel implements ActionListener
         {
             case "OK":
                 saveConfig();
+                FMainWindow.getInstance().updateTable();
                 break;
             case "Reset":
                 readConfig();
