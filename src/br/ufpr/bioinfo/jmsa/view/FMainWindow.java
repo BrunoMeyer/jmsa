@@ -530,8 +530,8 @@ public class FMainWindow extends JFrame
                             try {
                             	// Get the name of file choosed by user
                             	String file_name_to_save = chooserSave.getSelectedFile().toString();
-
-                            	selectedPanelPeaklistFiles.saveToZIP(file_name_to_save, getSelectedPanelPeaks());
+                            	List<OPeaklist> peaks_save = getLoadingSelectedPeaklists();
+                            	selectedPanelPeaklistFiles.saveToZIP(file_name_to_save, peaks_save);
                             } catch (Exception err){
                         		err.printStackTrace();
                             }
