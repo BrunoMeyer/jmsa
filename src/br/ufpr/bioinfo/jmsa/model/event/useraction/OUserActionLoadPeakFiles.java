@@ -103,6 +103,7 @@ public class OUserActionLoadPeakFiles implements OEvento
                 //
                 //
                 ArrayList<File> foundPeakFiles = new ArrayList<File>();
+                ArrayList<File> foundPeakFilesRoot = new ArrayList<File>();
                 for (File folder : seletedFolders)
                 {
                     ArrayList<File> files = CUtils.listFiles(folder, true);
@@ -113,6 +114,7 @@ public class OUserActionLoadPeakFiles implements OEvento
                             if (file.getName().endsWith("peaklist.xml") || file.getName().toLowerCase().endsWith("peaks"))
                             {
                                 foundPeakFiles.add(file);
+                                foundPeakFilesRoot.add(folder);
                             }
                         }
                     }
@@ -135,6 +137,9 @@ public class OUserActionLoadPeakFiles implements OEvento
                     try
                     {
                         OPeaklist peaklist = new OPeaklist(path);
+                        int i = validsCounter+invalidsCounter;
+                        peaklist.localPath = (String) path.toString().replace(
+                        					foundPeakFilesRoot.get(i).toString(), "");
                         //
                         if (peaklist.valid)
                         {

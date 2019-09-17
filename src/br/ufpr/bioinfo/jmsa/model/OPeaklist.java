@@ -34,6 +34,7 @@ public class OPeaklist
     public boolean valid = false;
     //
     public File peaklistFile;
+    public String localPath = "";
     public File peaklistJMSAINFOFile;
     //Information from original XML file
     public String spectrumid = "";

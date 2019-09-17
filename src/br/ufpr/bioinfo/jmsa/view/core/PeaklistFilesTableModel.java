@@ -7,7 +7,7 @@ import br.ufpr.bioinfo.jmsa.model.OPeaklist;
 public class PeaklistFilesTableModel extends AbstractTableModel
 {
     public ArrayList<OPeaklist> peaklists = new ArrayList<OPeaklist>();
-    public String[] columnNames = new String[] { "TemporaryID", "Selected", "Reflex", "Name", "SpectrumID", "Species", "Strain" };
+    public String[] columnNames = new String[] { "TemporaryID", "Selected", "Reflex", "Name", "SpectrumID", "Species", "Strain", "File Path" };
     public boolean globalTrigger = true;
     public PeaklistFilesTableModel()
     {
@@ -75,7 +75,7 @@ public class PeaklistFilesTableModel extends AbstractTableModel
     @Override
     public int getColumnCount()
     {
-        return 7;
+        return columnNames.length;
     }
     
     public String getColumnName(int col)
@@ -118,6 +118,9 @@ public class PeaklistFilesTableModel extends AbstractTableModel
                     break;
                 case 6:
                     value = peaklist.jmsainfoStrain;
+                    break;
+                case 7:
+                    value = peaklist.localPath.toString();
                     break;
                 default:
                     value = peaklist.spectrumid;

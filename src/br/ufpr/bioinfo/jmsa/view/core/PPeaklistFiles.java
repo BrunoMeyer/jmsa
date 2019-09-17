@@ -177,9 +177,9 @@ public class PPeaklistFiles extends JPanel
     
     
     
-    public void setVisibleColumns(boolean showName, boolean showSpectrumID, boolean showSpecies, boolean showStrain)
+    public void setVisibleColumns(boolean showName, boolean showSpectrumID, boolean showSpecies, boolean showStrain, boolean showFilePath)
     {
-        Boolean[] columnsToShow = new Boolean[] { true, this.showMarkers, this.showMarkers, showName, showSpectrumID, showSpecies, showStrain };
+        Boolean[] columnsToShow = new Boolean[] { true, this.showMarkers, this.showMarkers, showName, showSpectrumID, showSpecies, showStrain, showFilePath };
         //
         
         TableColumnModel tableColumnModel = table.getColumnModel();
@@ -210,7 +210,8 @@ public class PPeaklistFiles extends JPanel
     			fmain.checkBoxMenuItemShowMSName.isSelected(),
     			fmain.checkBoxMenuItemShowMSSpectrumID.isSelected(),
     			fmain.checkBoxMenuItemShowMSSpecies.isSelected(),
-    			fmain.checkBoxMenuItemShowMSStrain.isSelected()
+    			fmain.checkBoxMenuItemShowMSStrain.isSelected(),
+    			fmain.checkBoxMenuItemShowFilePath.isSelected()
     	);
     }
     

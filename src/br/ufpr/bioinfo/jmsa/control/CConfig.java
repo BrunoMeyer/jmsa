@@ -19,6 +19,7 @@ public class CConfig
     public boolean showMSSpectrumID = true;
     public boolean showMSSpecies = true;
     public boolean showMSStrain = true;
+    public boolean showFilePath = true;
     public boolean plotTitleName = true;
     public boolean plotTitleSpectrumID = true;
     public boolean plotTitleSpecies = true;
@@ -101,6 +102,7 @@ public class CConfig
             plotTitleSpectrumID = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotTitleSpectrumID", Boolean.class);
             plotTitleSpecies = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotTitleSpecies", Boolean.class);
             plotTitleStrain = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotTitleStrain", Boolean.class);
+            showFilePath = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "ShowFilePath", Boolean.class);
             
         }
         catch (Exception e)
@@ -124,6 +126,7 @@ public class CConfig
             wini.put(rb.getString("CONFIG.SECTION"), "PlotTitleSpectrumID", plotTitleSpectrumID);
             wini.put(rb.getString("CONFIG.SECTION"), "PlotTitleSpecies", plotTitleSpecies);
             wini.put(rb.getString("CONFIG.SECTION"), "PlotTitleStrain", plotTitleStrain);
+            wini.put(rb.getString("CONFIG.SECTION"), "ShowFilePath", showFilePath);
             wini.store();
         }
         catch (Exception e)
