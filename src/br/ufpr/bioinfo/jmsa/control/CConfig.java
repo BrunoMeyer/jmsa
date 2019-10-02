@@ -24,6 +24,8 @@ public class CConfig
     public boolean plotTitleSpectrumID = true;
     public boolean plotTitleSpecies = true;
     public boolean plotTitleStrain = true;
+    public boolean plotEnableIntensity = true;
+    public boolean plotEnableRawSpectre = false;
     
     //
     //OS Info
@@ -102,8 +104,10 @@ public class CConfig
             plotTitleSpectrumID = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotTitleSpectrumID", Boolean.class);
             plotTitleSpecies = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotTitleSpecies", Boolean.class);
             plotTitleStrain = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotTitleStrain", Boolean.class);
-            showFilePath = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "ShowFilePath", Boolean.class);
+            plotEnableIntensity = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotEnableIntensity", Boolean.class);
+            plotEnableRawSpectre = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotEnableRawSpectre", Boolean.class);
             
+            showFilePath = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "ShowFilePath", Boolean.class);
         }
         catch (Exception e)
         {
@@ -126,6 +130,8 @@ public class CConfig
             wini.put(rb.getString("CONFIG.SECTION"), "PlotTitleSpectrumID", plotTitleSpectrumID);
             wini.put(rb.getString("CONFIG.SECTION"), "PlotTitleSpecies", plotTitleSpecies);
             wini.put(rb.getString("CONFIG.SECTION"), "PlotTitleStrain", plotTitleStrain);
+            wini.put(rb.getString("CONFIG.SECTION"), "PlotEnableIntensity", plotEnableIntensity);
+            wini.put(rb.getString("CONFIG.SECTION"), "PlotEnableRawSpectre", plotEnableRawSpectre);
             wini.put(rb.getString("CONFIG.SECTION"), "ShowFilePath", showFilePath);
             wini.store();
         }

@@ -13,6 +13,8 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
+
+import br.ufpr.bioinfo.jmsa.control.CConfig;
 import br.ufpr.bioinfo.jmsa.model.OPeak;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
 
@@ -25,7 +27,11 @@ public class PPeaklistPlot extends JPanel
     public PPeaklistPlot(OPeaklist peaklist, boolean intensity)
     {
         this.peaklist = peaklist;
-        //
+        reload(intensity);
+    }
+    
+    private void reload(boolean intensity) {
+    	//
         //
         setLayout(new BorderLayout());
         //        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -40,15 +46,32 @@ public class PPeaklistPlot extends JPanel
         XYPlot xyPlot = jFreeChart.getXYPlot();
         ChartPanel chartPanel = new ChartPanel(jFreeChart);
         
-        for (Iterator<OPeak> iterator = peaklist.getPeaks().iterator(); iterator.hasNext();)
-        {
-            OPeak peak = iterator.next();
-            double val = peak.absi;
-            if(val > 0 && !intensity){
-            	val = 1;
+        // Decide if the plot only peaklist data or full spectra (raw data)
+        // TODO: Optimize plots when use full spectra
+        if(CConfig.getInstance().plotEnableRawSpectre) {
+        	int i = 1;
+            for (Iterator<Long> iterator = peaklist.rawSpectre.iterator(); iterator.hasNext();)
+            {
+            	long val = iterator.next();
+                if(val > 0 && !intensity){
+                	val = 1;
+                }
+                intervalSeries.add(i/2,i/2,i/2,val,val,val);
+                i++;
             }
-            intervalSeries.add(peak.mass, peak.mass, peak.mass, val, val, val);
         }
+        else{        	
+        	for (Iterator<OPeak> iterator = peaklist.getPeaks().iterator(); iterator.hasNext();)
+        	{
+        		OPeak peak = iterator.next();
+        		double val = peak.absi;
+        		if(val > 0 && !intensity){
+                	val = 1;
+                }
+        		intervalSeries.add(peak.mass, peak.mass, peak.mass, val, val, val);
+        	}
+        }
+        
         dataset.addSeries(intervalSeries);
         //
         xyPlot.getRenderer().setSeriesPaint(0,peaklist.spectrumForegroundColor);

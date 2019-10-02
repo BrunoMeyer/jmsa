@@ -111,7 +111,7 @@ public class FMainWindow extends JFrame
     public JMenu menuFile = new JMenu("File");
     public JMenu menuView = new JMenu("View");
     public JMenu menuShowColumns = new JMenu("Show Columns");
-    public JMenu menuPlotTitle = new JMenu("Plot Name");
+    public JMenu menuPlotTitle = new JMenu("Plot Options");
     public JMenu menuLoadOptions = new JMenu("Load options");
     public JMenu menuHelp = new JMenu("Help");
     public JMenuItem menuItemLoadFiles = new JMenuItem("Load Files");
@@ -127,7 +127,9 @@ public class FMainWindow extends JFrame
     public JCheckBoxMenuItem checkBoxMenuItemPlotTitleSpectrumID = new JCheckBoxMenuItem("SpectrumID", CConfig.getInstance().plotTitleSpectrumID);
     public JCheckBoxMenuItem checkBoxMenuItemPlotTitleSpecies = new JCheckBoxMenuItem("Species", CConfig.getInstance().plotTitleSpecies);
     public JCheckBoxMenuItem checkBoxMenuItemPlotTitleStrain = new JCheckBoxMenuItem("Strain", CConfig.getInstance().plotTitleStrain);
-    public JCheckBoxMenuItem checkBoxMenuItemPlotEnableIntensity = new JCheckBoxMenuItem("Enable Intensity");
+    public JCheckBoxMenuItem checkBoxMenuItemPlotEnableIntensity = new JCheckBoxMenuItem("Enable Intensity", CConfig.getInstance().plotEnableIntensity);
+    public JCheckBoxMenuItem checkBoxMenuItemPlotEnableRawSpectre = new JCheckBoxMenuItem("Enable Raw Spectra Data", CConfig.getInstance().plotEnableRawSpectre);
+    
     public JCheckBoxMenuItem checkBoxMenuItemIncrementalLoad = new JCheckBoxMenuItem("Incremental Loading");
     
     public JToolBar toolBar = new JToolBar("Tools");
@@ -209,6 +211,7 @@ public class FMainWindow extends JFrame
         menuPlotTitle.add(checkBoxMenuItemPlotTitleSpecies);
         menuPlotTitle.add(checkBoxMenuItemPlotTitleStrain);
         menuPlotTitle.add(checkBoxMenuItemPlotEnableIntensity);
+        menuPlotTitle.add(checkBoxMenuItemPlotEnableRawSpectre);
         menuLoadOptions.add(checkBoxMenuItemIncrementalLoad);
         
         //
@@ -444,6 +447,8 @@ public class FMainWindow extends JFrame
                     case "PlotTitleSpectrumID":
                     case "PlotTitleSpecies":
                     case "PlotTitleStrain":
+                    case "PlotIntensity":
+                    case "PlotRawSpectre":
                         CConfig.getInstance().showMSName = checkBoxMenuItemShowMSName.isSelected();
                         CConfig.getInstance().showMSSpectrumID = checkBoxMenuItemShowMSSpectrumID.isSelected();
                         CConfig.getInstance().showMSSpecies = checkBoxMenuItemShowMSSpecies.isSelected();
@@ -453,6 +458,8 @@ public class FMainWindow extends JFrame
                         CConfig.getInstance().plotTitleSpectrumID = checkBoxMenuItemPlotTitleSpectrumID.isSelected();
                         CConfig.getInstance().plotTitleSpecies = checkBoxMenuItemPlotTitleSpecies.isSelected();
                         CConfig.getInstance().plotTitleStrain = checkBoxMenuItemPlotTitleStrain.isSelected();
+                        CConfig.getInstance().plotEnableIntensity = checkBoxMenuItemPlotEnableIntensity.isSelected();
+                        CConfig.getInstance().plotEnableRawSpectre = checkBoxMenuItemPlotEnableRawSpectre.isSelected();
                         CConfig.getInstance().saveConfig();
                         
                         //
@@ -470,24 +477,23 @@ public class FMainWindow extends JFrame
                         int prevTab = tabbedPanePeaklist.getSelectedIndex();
                         tabbedPanePeaklist.setSelectedIndex(-1);
                         tabbedPanePeaklist.setSelectedIndex(prevTab);
-                        repaint();
-                        break;
-                    case "PlotIntensity":
-                    	panelPeaklistTablesPlots.removeAll();
-                        for (OPeaklist peaklist : peaklists)
-                        {
-                        	peaklist.reset();
-                            Box box = Box.createHorizontalBox();
-                            box.add(peaklist.getPeaklistPlot(checkBoxMenuItemPlotEnableIntensity.isSelected()));
-                            box.add(peaklist.getPeaklistTable());
-                            panelPeaklistTablesPlots.add(box);
+                        
+                        if(e.getActionCommand() == "PlotIntensity" || e.getActionCommand() =="PlotRawSpectre") {                        	
+                        	panelPeaklistTablesPlots.removeAll();
+                        	for (OPeaklist peaklist : peaklists)
+                        	{
+                        		peaklist.reset();
+                        		Box box = Box.createHorizontalBox();
+                        		box.add(peaklist.getPeaklistPlot(checkBoxMenuItemPlotEnableIntensity.isSelected()));
+                        		box.add(peaklist.getPeaklistTable());
+                        		panelPeaklistTablesPlots.add(box);
+                        	}
+                        	
+                        	superPeaklistPlot.buildPlot(
+                        			peaklists,
+                        			checkBoxMenuItemPlotEnableIntensity.isSelected()
+                        			);
                         }
-                        
-                        superPeaklistPlot.buildPlot(
-                        		peaklists,
-                            	checkBoxMenuItemPlotEnableIntensity.isSelected()
-                        );
-                        
                         repaint();
                         break;
                     case "loadpeakfiles":
@@ -660,7 +666,10 @@ public class FMainWindow extends JFrame
         checkBoxMenuItemPlotEnableIntensity.setActionCommand("PlotIntensity");
         checkBoxMenuItemPlotEnableIntensity.addActionListener(actionListener);
         
-        checkBoxMenuItemPlotEnableIntensity.setActionCommand("IncrementalLoad");
+        checkBoxMenuItemPlotEnableRawSpectre.setActionCommand("PlotRawSpectre");
+        checkBoxMenuItemPlotEnableRawSpectre.addActionListener(actionListener);
+        
+        checkBoxMenuItemIncrementalLoad.setActionCommand("IncrementalLoad");
         checkBoxMenuItemIncrementalLoad.addActionListener(actionListener);
         
         //

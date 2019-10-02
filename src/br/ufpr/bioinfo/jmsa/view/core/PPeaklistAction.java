@@ -50,16 +50,10 @@ public class PPeaklistAction extends JPanel
     public PPeaklistAction(List<OPeaklist> peaklists)
     {
         setLayout(new GridLayout(0, 1));
-        // panelMain.setLayout(new BoxLayout(panelMain, BoxLayout.Y_AXIS));
-        // panelMain.setLayout(new GridLayout(10, 1));
-        // scrollPanePeaklistFiles.setLayout(new GridLayout(0, 1));
         
         add(panelMain);
         add(scrollPanePeaklistFiles);
         scrollPanePeaklistFiles.setViewportView(panelMain);
-        // panelMain.setLayout((LayoutManager) new BoxLayout(panelMain, BoxLayout.Y_AXIS));
-        // setLayout(new BorderLayout(1, 2));
-
 
         String[] options = new String[] {
             "Update Name",
@@ -74,7 +68,6 @@ public class PPeaklistAction extends JPanel
         selectField.setBorder(BorderFactory.createCompoundBorder(border, 
 				BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         
-        // panelParameters.setLayout(new GridLayout(2, 1));
         panelParameters.setLayout(new BoxLayout(panelParameters, BoxLayout.Y_AXIS));
         panelParameters.setBorder(BorderFactory.createCompoundBorder(border, 
 				BorderFactory.createEmptyBorder(5, 5, 5, 5)));
@@ -125,6 +118,7 @@ public class PPeaklistAction extends JPanel
                         for (OPeaklist peaklist : peaklists){
                             peaklist.jmsainfoName = textName.getText();
                             peaklist.saveJMSAINFO();
+                            peaklist.reloadPeaklistInfo();
                         }
                         if(peaklists.size() > 0) {                        	
                         	FMainWindow.getInstance().firePeaklistPanelChange();
@@ -146,6 +140,7 @@ public class PPeaklistAction extends JPanel
                         for (OPeaklist peaklist : peaklists){
                             peaklist.jmsainfoSpecie = textSpecie.getText();
                             peaklist.saveJMSAINFO();
+                            peaklist.reloadPeaklistInfo();
                         }
                         if(peaklists.size() > 0) {                        	
                         	FMainWindow.getInstance().firePeaklistPanelChange();
@@ -167,6 +162,7 @@ public class PPeaklistAction extends JPanel
                         for (OPeaklist peaklist : peaklists){
                             peaklist.jmsainfoStrain = textStrain.getText();
                             peaklist.saveJMSAINFO();
+                            peaklist.reloadPeaklistInfo();
                         }
                         if(peaklists.size() > 0) {                        	
                         	FMainWindow.getInstance().firePeaklistPanelChange();
@@ -188,6 +184,7 @@ public class PPeaklistAction extends JPanel
                         for (OPeaklist peaklist : peaklists){
                             peaklist.jmsainfoDNA = textDNA.getText();
                             peaklist.saveJMSAINFO();
+                            peaklist.reloadPeaklistInfo();
                         }
                         if(peaklists.size() > 0) {                        	
                         	FMainWindow.getInstance().firePeaklistPanelChange();
@@ -209,6 +206,7 @@ public class PPeaklistAction extends JPanel
                         for (OPeaklist peaklist : peaklists){
                             peaklist.jmsainfoNotes = textNotes.getText();
                             peaklist.saveJMSAINFO();
+                            peaklist.reloadPeaklistInfo();
                         }
                         if(peaklists.size() > 0) {                        	
                         	FMainWindow.getInstance().firePeaklistPanelChange();

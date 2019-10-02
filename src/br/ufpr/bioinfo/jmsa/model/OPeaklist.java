@@ -1,18 +1,24 @@
 package br.ufpr.bioinfo.jmsa.model;
 
 import java.awt.Color;
+import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.ini4j.Wini;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -21,6 +27,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+
 import br.ufpr.bioinfo.jmsa.view.FMainWindow;
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistInfo;
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistPlot;
@@ -43,6 +51,7 @@ public class OPeaklist
     public String creator = "";
     public String version = "";
     public ArrayList<OPeak> peaks = new ArrayList<OPeak>();
+    public ArrayList<Long> rawSpectre = new ArrayList<Long>();
     //Information from JMSA and JMSAINFO file
     public String jmsainfoName = "";
     public String jmsainfoSpecie = "";
@@ -66,6 +75,8 @@ public class OPeaklist
         //
         readXML();
         readJMSAINFO();
+        readRawSpectreData();
+        
         //
         if (valid)
         {
@@ -83,6 +94,7 @@ public class OPeaklist
             System.out.println("Peaklist inválido: " + peaklistFile.getAbsolutePath());
         }
     }
+
     
     public ArrayList<OPeak> getPeaks() {
     	return this.peaks;
@@ -115,8 +127,17 @@ public class OPeaklist
         {
             if (peaklistInfo == null)
             {
-                peaklistInfo = new PPeaklistInfo(this);
+            	reloadPeaklistInfo();
             }
+        }
+        return peaklistInfo;
+    }
+    
+    public PPeaklistInfo reloadPeaklistInfo()
+    {
+        if (valid)
+        {
+            peaklistInfo = new PPeaklistInfo(this);
         }
         return peaklistInfo;
     }
@@ -126,6 +147,33 @@ public class OPeaklist
         peaklistPlot = null;
         peaklistTable = null;
         peaklistInfo = null;
+    }
+    
+    public void readRawSpectreData() throws IOException {	
+        String rowSpectreDataPath = (String) peaklistFile.getParentFile().getParentFile().getParentFile().toString();
+        rowSpectreDataPath = Paths.get(rowSpectreDataPath, "fid").toString();
+        // TODO: Add search of fid file in peaklist directory and get acqu info
+        try{
+        	DataInputStream in = new DataInputStream(new FileInputStream(rowSpectreDataPath.toString()));
+        	int i = 1;
+            try {
+                while (true){
+                    // Read an unsigned int value and convert to long int
+                	byte[] intData = new byte[4];
+                    in.readFully(intData);
+                    
+                    long val = (long) ByteBuffer.wrap(intData)
+                    .order(ByteOrder.LITTLE_ENDIAN).getInt();
+                    
+                    rawSpectre.add(val);
+                    i++;
+                }
+            } catch (EOFException ignored) {}
+            in.close();
+        }
+        catch(FileNotFoundException e_notfound){
+            e_notfound.printStackTrace();
+        }
     }
     
     public void readXML() throws ParserConfigurationException, SAXException, IOException

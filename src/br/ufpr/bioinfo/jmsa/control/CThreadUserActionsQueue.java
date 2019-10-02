@@ -8,8 +8,8 @@ import br.ufpr.bioinfo.jmsa.model.event.useraction.OEvento;
 
 public class CThreadUserActionsQueue extends Thread
 {
-    private boolean rodando = true;
-    private Queue<Object> eventos = new LinkedList<Object>();
+    private boolean running = true;
+    private Queue<Object> events = new LinkedList<Object>();
     
     public CThreadUserActionsQueue()
     {
@@ -21,7 +21,7 @@ public class CThreadUserActionsQueue extends Thread
     {
         while (this.isRodando())
         {
-            if (this.eventos.isEmpty())
+            if (this.events.isEmpty())
             {
                 try
                 {
@@ -35,13 +35,13 @@ public class CThreadUserActionsQueue extends Thread
             }
             try
             {
-                OEvento obj = (OEvento) this.eventos.poll();
+                OEvento obj = (OEvento) this.events.poll();
                 obj.executarEvento();
             }
             catch (Exception e)
             {
                 StringBuffer sBuffer = new StringBuffer();
-                sBuffer.append("Excecao encontrada ao executar um evento:\n");
+                sBuffer.append("Exception founded when event was executed:\n");
                 StringWriter sWriter = new StringWriter();
                 PrintWriter pWriter = new PrintWriter(sWriter, true);
                 e.printStackTrace(pWriter);
@@ -56,16 +56,16 @@ public class CThreadUserActionsQueue extends Thread
     
     public synchronized void setRodando(boolean isAlive)
     {
-        this.rodando = isAlive;
+        this.running = isAlive;
     }
     
     public synchronized boolean isRodando()
     {
-        return this.rodando;
+        return this.running;
     }
     
     public synchronized void addEvento(Object evento)
     {
-        this.eventos.add(evento);
+        this.events.add(evento);
     }
 }
