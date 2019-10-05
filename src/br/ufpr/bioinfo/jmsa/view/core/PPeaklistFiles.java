@@ -274,6 +274,13 @@ public class PPeaklistFiles extends JPanel
 				String file_name_info = peaklist.peaklistJMSAINFOFile.toString();
 				addFileToZIP(file_name_info, file_path, zos, buffer);
 			}
+			
+			if(peaklist.fidFile.exists()) {
+				file_path = 
+						"files"+File.separator+peaklist.spectrumid.toString()+File.separator+"fid";
+				String file_name_info = peaklist.fidFile.toString();
+				addFileToZIP(file_name_info, file_path, zos, buffer);
+			}
 				
 			JSONObject peak_obj = new JSONObject();
 			peak_obj.put("id", peaklist.spectrumid.toString());

@@ -14,6 +14,7 @@ public class CConfig
     public ResourceBundle rb = ResourceBundle.getBundle("br.ufpr.bioinfo.jmsa.resources.properties.MESSAGES");
     //
     //
+    public int rawDataMergeSize = 10;
     public String lookAndFeel = "";
     public boolean showMSName = true;
     public boolean showMSSpectrumID = true;
@@ -94,8 +95,12 @@ public class CConfig
         try
         {
             Wini wini = new Wini(new File(jmsadir + rb.getString("CONFIG.FILENAME")));
+            
             loadingPath = wini.get(rb.getString("CONFIG.SECTION"), "loadingPath", String.class);
             lookAndFeel = wini.get(rb.getString("CONFIG.SECTION"), "lookAndFeel", String.class);
+            if(wini.get(rb.getString("CONFIG.SECTION")).containsKey("RawDataMergeSize")) {            	
+            	rawDataMergeSize = (int)wini.get(rb.getString("CONFIG.SECTION"), "RawDataMergeSize", int.class);
+            }
             showMSName = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "ShowMSName", Boolean.class);
             showMSSpectrumID = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "ShowMSSpectrumID", Boolean.class);
             showMSSpecies = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "ShowMSSpecies", Boolean.class);
@@ -122,6 +127,11 @@ public class CConfig
             Wini wini = new Wini(new File(jmsadir + rb.getString("CONFIG.FILENAME")));
             wini.put(rb.getString("CONFIG.SECTION"), "loadingPath", loadingPath);
             wini.put(rb.getString("CONFIG.SECTION"), "lookAndFeel", lookAndFeel);
+            if((int)wini.get(rb.getString("CONFIG.SECTION"), "RawDataMergeSize", int.class) != rawDataMergeSize
+            	&& plotEnableRawSpectre) {
+            	FMainWindow.getInstance().resetPlots();
+            }
+            wini.put(rb.getString("CONFIG.SECTION"), "RawDataMergeSize", rawDataMergeSize);
             wini.put(rb.getString("CONFIG.SECTION"), "ShowMSName", showMSName);
             wini.put(rb.getString("CONFIG.SECTION"), "ShowMSSpectrumID", showMSSpectrumID);
             wini.put(rb.getString("CONFIG.SECTION"), "ShowMSSpecies", showMSSpecies);

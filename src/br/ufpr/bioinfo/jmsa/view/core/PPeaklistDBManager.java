@@ -74,7 +74,7 @@ public class PPeaklistDBManager extends JPanel
     {
     	this.fmain = fmain;
     	spinner = new JSpinner();
-    	spinner.setValue(200);
+    	spinner.setValue(10);
     	
     	myContent.setLayout((LayoutManager) new BoxLayout(myContent, BoxLayout.Y_AXIS));
         //

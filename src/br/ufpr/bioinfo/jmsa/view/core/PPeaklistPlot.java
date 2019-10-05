@@ -11,6 +11,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
 
@@ -40,24 +41,45 @@ public class PPeaklistPlot extends JPanel
         setAlignmentX(JPanel.LEFT_ALIGNMENT);
         //
         //
-        XYIntervalSeriesCollection dataset = new XYIntervalSeriesCollection();
         XYIntervalSeries intervalSeries = new XYIntervalSeries(peaklist.toString());
+
+        XYIntervalSeriesCollection dataset = new XYIntervalSeriesCollection();
         JFreeChart jFreeChart = ChartFactory.createXYBarChart(peaklist.toString(), "MASS", false, "INTENSITY", dataset, PlotOrientation.VERTICAL, false, true, true);
+        
+        
         XYPlot xyPlot = jFreeChart.getXYPlot();
         ChartPanel chartPanel = new ChartPanel(jFreeChart);
         
         // Decide if the plot only peaklist data or full spectra (raw data)
         // TODO: Optimize plots when use full spectra
+		
+		
+
+		// get difference of two nanoTime values
+		
         if(CConfig.getInstance().plotEnableRawSpectre) {
+        	long mean_val = 0;
+    		int mean_mass = 0;
+    		int merge_size = CConfig.getInstance().rawDataMergeSize;
+    		
         	int i = 1;
             for (Iterator<Long> iterator = peaklist.rawSpectre.iterator(); iterator.hasNext();)
             {
             	long val = iterator.next();
-                if(val > 0 && !intensity){
-                	val = 1;
-                }
-                intervalSeries.add(i/2,i/2,i/2,val,val,val);
-                i++;
+            	mean_mass+=i;
+            	mean_val+=val;
+            	
+            	if(i%merge_size == 0) {
+            		mean_mass/=merge_size;
+            		mean_val/=merge_size;
+            		if(mean_mass > 0 && !intensity){
+            			mean_mass = 1;
+            		}
+            		intervalSeries.add(mean_mass/2,mean_mass/2,mean_mass/2,mean_val,mean_val,mean_val);
+            		mean_mass = 0;
+            		mean_val = 0;
+            	}
+            	i++;
             }
         }
         else{        	
@@ -71,8 +93,10 @@ public class PPeaklistPlot extends JPanel
         		intervalSeries.add(peak.mass, peak.mass, peak.mass, val, val, val);
         	}
         }
-        
+		
+		
         dataset.addSeries(intervalSeries);
+        
         //
         xyPlot.getRenderer().setSeriesPaint(0,peaklist.spectrumForegroundColor);
         add(chartPanel, BorderLayout.CENTER);
@@ -88,5 +112,6 @@ public class PPeaklistPlot extends JPanel
         setMinimumSize(new Dimension(30, 30));
         setPreferredSize(null);
         validate();
+        
     }
 }

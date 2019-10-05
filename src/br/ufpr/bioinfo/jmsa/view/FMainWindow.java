@@ -478,21 +478,8 @@ public class FMainWindow extends JFrame
                         tabbedPanePeaklist.setSelectedIndex(-1);
                         tabbedPanePeaklist.setSelectedIndex(prevTab);
                         
-                        if(e.getActionCommand() == "PlotIntensity" || e.getActionCommand() =="PlotRawSpectre") {                        	
-                        	panelPeaklistTablesPlots.removeAll();
-                        	for (OPeaklist peaklist : peaklists)
-                        	{
-                        		peaklist.reset();
-                        		Box box = Box.createHorizontalBox();
-                        		box.add(peaklist.getPeaklistPlot(checkBoxMenuItemPlotEnableIntensity.isSelected()));
-                        		box.add(peaklist.getPeaklistTable());
-                        		panelPeaklistTablesPlots.add(box);
-                        	}
-                        	
-                        	superPeaklistPlot.buildPlot(
-                        			peaklists,
-                        			checkBoxMenuItemPlotEnableIntensity.isSelected()
-                        			);
+                        if(e.getActionCommand() == "PlotIntensity" || e.getActionCommand() == "PlotRawSpectre") {                            	
+                        	resetPlots();
                         }
                         repaint();
                         break;
@@ -916,4 +903,21 @@ public class FMainWindow extends JFrame
         }
     }
     
+    public void resetPlots() {
+    	List<OPeaklist> peaklists = getLoadingSelectedPeaklists();
+    	panelPeaklistTablesPlots.removeAll();
+    	for (OPeaklist peaklist : peaklists)
+    	{
+    		peaklist.reset();
+    		Box box = Box.createHorizontalBox();
+    		box.add(peaklist.getPeaklistPlot(checkBoxMenuItemPlotEnableIntensity.isSelected()));
+    		box.add(peaklist.getPeaklistTable());
+    		panelPeaklistTablesPlots.add(box);
+    	}
+    	
+    	superPeaklistPlot.buildPlot(
+    			peaklists,
+    			checkBoxMenuItemPlotEnableIntensity.isSelected()
+		);
+    }
 }

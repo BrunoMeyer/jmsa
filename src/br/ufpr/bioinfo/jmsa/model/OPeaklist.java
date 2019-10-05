@@ -42,6 +42,7 @@ public class OPeaklist
     public boolean valid = false;
     //
     public File peaklistFile;
+    public File fidFile;
     public String localPath = "";
     public File peaklistJMSAINFOFile;
     //Information from original XML file
@@ -72,6 +73,18 @@ public class OPeaklist
     public OPeaklist(File peaklistFile) throws ParserConfigurationException, SAXException, IOException
     {
         this.peaklistFile = peaklistFile;
+        
+        // Try to load fid file in the peaklist directory (only when load from zip)
+        String rowSpectreDataPath = (String) peaklistFile.getParentFile().toString();
+        fidFile = new File(Paths.get(rowSpectreDataPath, "fid").toString());
+        
+        // Otherwise, verify the original data, that is three directories "up"
+        if(!fidFile.exists()) {
+    		rowSpectreDataPath = (String) peaklistFile.getParentFile().getParentFile().getParentFile().toString();
+    		fidFile = new File(Paths.get(rowSpectreDataPath, "fid").toString());
+    	}
+        
+        		
         //
         readXML();
         readJMSAINFO();
@@ -149,12 +162,14 @@ public class OPeaklist
         peaklistInfo = null;
     }
     
-    public void readRawSpectreData() throws IOException {	
-        String rowSpectreDataPath = (String) peaklistFile.getParentFile().getParentFile().getParentFile().toString();
-        rowSpectreDataPath = Paths.get(rowSpectreDataPath, "fid").toString();
+    public void readRawSpectreData() throws IOException {
+    	if(!fidFile.exists()) {
+    		return;
+    	}
+    	
         // TODO: Add search of fid file in peaklist directory and get acqu info
         try{
-        	DataInputStream in = new DataInputStream(new FileInputStream(rowSpectreDataPath.toString()));
+        	DataInputStream in = new DataInputStream(new FileInputStream(fidFile.toString()));
         	int i = 1;
             try {
                 while (true){
