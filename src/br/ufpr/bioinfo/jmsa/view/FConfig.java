@@ -42,6 +42,7 @@ public class FConfig extends JDialog implements ActionListener
     private JLabel labelRawDataMergeSize = new JLabel("Raw Data Merge Size");
     private JSpinner spinnerRawDataMergeSize = new JSpinner();
     
+    private int label_width = 150;
     public FConfig()
     {
         super(FMainWindow.getInstance(), "Configuration", true);
@@ -121,13 +122,13 @@ public class FConfig extends JDialog implements ActionListener
         });
         //
         //
-        labelLookAndFeel.setPreferredSize(new Dimension(100, labelLookAndFeel.getPreferredSize().height));
-        labelLoadingPath.setPreferredSize(new Dimension(100, labelLoadingPath.getPreferredSize().height));
-        labelRawDataMergeSize.setPreferredSize(new Dimension(100, labelRawDataMergeSize.getPreferredSize().height));
+        labelLookAndFeel.setPreferredSize(new Dimension(label_width, labelLookAndFeel.getPreferredSize().height));
+        labelLoadingPath.setPreferredSize(new Dimension(label_width, labelLoadingPath.getPreferredSize().height));
+        labelRawDataMergeSize.setPreferredSize(new Dimension(label_width, labelRawDataMergeSize.getPreferredSize().height));
         
-        labelLookAndFeel.setMinimumSize(new Dimension(100, labelLookAndFeel.getPreferredSize().height));
-        labelLoadingPath.setMinimumSize(new Dimension(100, labelLoadingPath.getPreferredSize().height));
-        labelRawDataMergeSize.setMinimumSize(new Dimension(100, labelRawDataMergeSize.getPreferredSize().height));
+        labelLookAndFeel.setMinimumSize(new Dimension(label_width, labelLookAndFeel.getPreferredSize().height));
+        labelLoadingPath.setMinimumSize(new Dimension(label_width, labelLoadingPath.getPreferredSize().height));
+        labelRawDataMergeSize.setMinimumSize(new Dimension(label_width, labelRawDataMergeSize.getPreferredSize().height));
         //
         pack();
         setMinimumSize(getPreferredSize());
