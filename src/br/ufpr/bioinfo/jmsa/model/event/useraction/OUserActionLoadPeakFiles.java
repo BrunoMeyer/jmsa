@@ -73,12 +73,18 @@ public class OUserActionLoadPeakFiles implements OEvento
         //
         //
 
-        new Thread(new Runnable() {
+        Thread dialogThread = new Thread(new Runnable() {
         	@Override
 	        public void run() {
-        		dialog.setVisible(true);
-	        }
-        }).start();
+        		try {        			
+        			dialog.setVisible(true);
+        		}
+        		catch (Exception e1) {
+        			// This will be executed when the load was faster than this thread activation
+        		}
+        	}
+        });
+        dialogThread.start();
         
         //
         try
@@ -90,13 +96,14 @@ public class OUserActionLoadPeakFiles implements OEvento
                 progressBar.setIndeterminate(true);
                 progressBar.setValue(0);
                 lblStatusBar.setText("Progress...");
-                if(!FMainWindow.getInstance().checkBoxMenuItemIncrementalLoad.isSelected() && !this.incremental) {                	
-                	FMainWindow.getInstance().clearTable(); 
+                if(!(FMainWindow.getInstance().checkBoxMenuItemIncrementalLoad.isSelected() || this.incremental)) {                	
+                	FMainWindow.getInstance().clearTable();
                 }
                 
                 //
                 //
                 ArrayList<File> foundPeakFiles = new ArrayList<File>();
+                ArrayList<File> foundPeakFilesRoot = new ArrayList<File>();
                 for (File folder : seletedFolders)
                 {
                     ArrayList<File> files = CUtils.listFiles(folder, true);
@@ -107,6 +114,7 @@ public class OUserActionLoadPeakFiles implements OEvento
                             if (file.getName().endsWith("peaklist.xml") || file.getName().toLowerCase().endsWith("peaks"))
                             {
                                 foundPeakFiles.add(file);
+                                foundPeakFilesRoot.add(folder);
                             }
                         }
                     }
@@ -129,6 +137,9 @@ public class OUserActionLoadPeakFiles implements OEvento
                     try
                     {
                         OPeaklist peaklist = new OPeaklist(path);
+                        int i = validsCounter+invalidsCounter;
+                        peaklist.localPath = (String) path.toString().replace(
+                        					foundPeakFilesRoot.get(i).toString(), "");
                         //
                         if (peaklist.valid)
                         {
@@ -165,12 +176,15 @@ public class OUserActionLoadPeakFiles implements OEvento
             progressBar.setMaximum(0);
             progressBar.setValue(0);
             lblStatusBar.setText("Progress...");
-            FMainWindow.getInstance().clearTable();
+            if(!(FMainWindow.getInstance().checkBoxMenuItemIncrementalLoad.isSelected() || this.incremental)) {
+            	FMainWindow.getInstance().clearTable();
+            }
             FMainWindow.getInstance().setTableTriggerChange(true);
         }
         finally
         {
             dialog.dispose();
+            FMainWindow.getInstance().tabbedPaneMain.setSelectedComponent(FMainWindow.getInstance().panelPeaklist);
             afterEvent.callback();
             FMainWindow.getInstance().setTableTriggerChange(true);
             FMainWindow.getInstance().updateTable();

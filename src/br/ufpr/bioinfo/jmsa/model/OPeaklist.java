@@ -1,18 +1,34 @@
 package br.ufpr.bioinfo.jmsa.model;
 
 import java.awt.Color;
+import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.ini4j.Wini;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+
 import br.ufpr.bioinfo.jmsa.view.FMainWindow;
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistInfo;
 import br.ufpr.bioinfo.jmsa.view.core.PPeaklistPlot;
@@ -20,9 +36,14 @@ import br.ufpr.bioinfo.jmsa.view.core.PPeaklistTable;
 
 public class OPeaklist
 {
+	private static final AtomicInteger countId = new AtomicInteger(0);
+	public int panel_id;
+	
     public boolean valid = false;
     //
     public File peaklistFile;
+    public File fidFile;
+    public String localPath = "";
     public File peaklistJMSAINFOFile;
     //Information from original XML file
     public String spectrumid = "";
@@ -31,11 +52,13 @@ public class OPeaklist
     public String creator = "";
     public String version = "";
     public ArrayList<OPeak> peaks = new ArrayList<OPeak>();
+    public ArrayList<Long> rawSpectre = new ArrayList<Long>();
     //Information from JMSA and JMSAINFO file
     public String jmsainfoName = "";
     public String jmsainfoSpecie = "";
     public String jmsainfoStrain = "";
     public String jmsainfoNotes = "";
+    public String jmsainfoDNA = "";
     //
     //
     //Presentation attributes
@@ -50,9 +73,23 @@ public class OPeaklist
     public OPeaklist(File peaklistFile) throws ParserConfigurationException, SAXException, IOException
     {
         this.peaklistFile = peaklistFile;
+        
+        // Try to load fid file in the peaklist directory (only when load from zip)
+        String rowSpectreDataPath = (String) peaklistFile.getParentFile().toString();
+        fidFile = new File(Paths.get(rowSpectreDataPath, "fid").toString());
+        
+        // Otherwise, verify the original data, that is three directories "up"
+        if(!fidFile.exists()) {
+    		rowSpectreDataPath = (String) peaklistFile.getParentFile().getParentFile().getParentFile().toString();
+    		fidFile = new File(Paths.get(rowSpectreDataPath, "fid").toString());
+    	}
+        
+        		
         //
         readXML();
         readJMSAINFO();
+        readRawSpectreData();
+        
         //
         if (valid)
         {
@@ -62,12 +99,15 @@ public class OPeaklist
             int b = hash & 0x0000FF;
             spectrumForegroundColor = new Color(r, g, b);
             spectrumBackgroundColor = new Color(255 - r, 255 - g, 255 - b);
+            
+            panel_id = countId.incrementAndGet();
         }
         else
         {
             System.out.println("Peaklist inválido: " + peaklistFile.getAbsolutePath());
         }
     }
+
     
     public ArrayList<OPeak> getPeaks() {
     	return this.peaks;
@@ -100,8 +140,17 @@ public class OPeaklist
         {
             if (peaklistInfo == null)
             {
-                peaklistInfo = new PPeaklistInfo(this);
+            	reloadPeaklistInfo();
             }
+        }
+        return peaklistInfo;
+    }
+    
+    public PPeaklistInfo reloadPeaklistInfo()
+    {
+        if (valid)
+        {
+            peaklistInfo = new PPeaklistInfo(this);
         }
         return peaklistInfo;
     }
@@ -111,6 +160,35 @@ public class OPeaklist
         peaklistPlot = null;
         peaklistTable = null;
         peaklistInfo = null;
+    }
+    
+    public void readRawSpectreData() throws IOException {
+    	if(!fidFile.exists()) {
+    		return;
+    	}
+    	
+        // TODO: Add search of fid file in peaklist directory and get acqu info
+        try{
+        	DataInputStream in = new DataInputStream(new FileInputStream(fidFile.toString()));
+        	int i = 1;
+            try {
+                while (true){
+                    // Read an unsigned int value and convert to long int
+                	byte[] intData = new byte[4];
+                    in.readFully(intData);
+                    
+                    long val = (long) ByteBuffer.wrap(intData)
+                    .order(ByteOrder.LITTLE_ENDIAN).getInt();
+                    
+                    rawSpectre.add(val);
+                    i++;
+                }
+            } catch (EOFException ignored) {}
+            in.close();
+        }
+        catch(FileNotFoundException e_notfound){
+            e_notfound.printStackTrace();
+        }
     }
     
     public void readXML() throws ParserConfigurationException, SAXException, IOException
@@ -171,22 +249,33 @@ public class OPeaklist
     
     public void readJMSAINFO()
     {
+    	
         peaklistJMSAINFOFile = new File(peaklistFile.getAbsolutePath() + ".jmsainfo");
         //
         if (peaklistJMSAINFOFile.exists())
         {
-            try
+        	try (FileReader reader = new FileReader(peaklistFile.getAbsolutePath() + ".jmsainfo"))
             {
-                Wini wini = new Wini(peaklistJMSAINFOFile);
-                jmsainfoName = wini.get("jmsainfo", "jmsainfoName", String.class);
-                jmsainfoSpecie = wini.get("jmsainfo", "jmsainfoSpecie", String.class);
-                jmsainfoStrain = wini.get("jmsainfo", "jmsainfoStrain", String.class);
-                jmsainfoNotes = wini.get("jmsainfo", "jmsainfoNotes", String.class);
-            }
-            catch (Exception e)
-            {
+                //Read JSON file
+        		JSONParser jsonParser = new JSONParser();
+                Object obj = jsonParser.parse(reader);
+     
+                JSONObject json_info = (JSONObject) obj;
+                
+                jmsainfoName = (String) json_info.get("jmsainfoName");
+                jmsainfoSpecie = (String) json_info.get("jmsainfoSpecie");
+                jmsainfoStrain = (String) json_info.get("jmsainfoStrain");
+                jmsainfoNotes = (String) json_info.get("jmsainfoNotes");
+                jmsainfoDNA = (String) json_info.get("DNA");
+     
+            } catch (FileNotFoundException e) {
+                // e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
                 e.printStackTrace();
             }
+        	
         }
     }
     
@@ -198,12 +287,30 @@ public class OPeaklist
             {
                 peaklistJMSAINFOFile.createNewFile();
             }
-            Wini wini = new Wini(peaklistJMSAINFOFile);
-            wini.put("jmsainfo", "jmsainfoName", jmsainfoName);
-            wini.put("jmsainfo", "jmsainfoSpecie", jmsainfoSpecie);
-            wini.put("jmsainfo", "jmsainfoStrain", jmsainfoStrain);
-            wini.put("jmsainfo", "jmsainfoNotes", jmsainfoNotes);
-            wini.store();
+            JSONObject jmsa_info = new JSONObject();
+            
+            jmsa_info.put("jmsainfoName", jmsainfoName);
+            jmsa_info.put("jmsainfoSpecie", jmsainfoSpecie);
+            jmsa_info.put("jmsainfoStrain", jmsainfoStrain);
+            jmsa_info.put("jmsainfoNotes", jmsainfoNotes);
+            jmsa_info.put("DNA", jmsainfoDNA);
+            
+            //Write JSON file
+            try (FileWriter file = new FileWriter(peaklistFile.getAbsolutePath() + ".jmsainfo")) {
+            	
+            	// Identation level equal to 4
+            	// TODO: Import new libraries and import pretty print json functions
+            	String str = jmsa_info.toJSONString();
+            	str = str.replaceAll("\\{", "\\{\n    ");
+            	str = str.replaceAll(",", ",\n    ");
+            	str = str.replaceAll("\"\\}", "\"\n\\}");
+            	file.write(str);
+                
+                file.flush();
+     
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         catch (Exception e)
         {

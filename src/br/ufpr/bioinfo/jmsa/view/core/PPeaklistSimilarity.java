@@ -83,16 +83,19 @@ public class PPeaklistSimilarity extends JPanel
     	
     	for (int col = 0; col < peaklists.size(); col++){
     		tableCsv += "\"";
-    		tableCsv+=(peaklists.get(col).toString())+"\n";
+    		tableCsv+=(peaklists.get(col).toString());
     		//tableCsv+=(peaklists.get(col).jmsainfoName);
-    		tableCsv+="\",";
+    		tableCsv+="\"";
+    		if(col != peaklists.size()-1) {
+    			tableCsv+=",";
+    		}
     	}
     	tableCsv+="\n";
     	
     	for (int col = 0; col < peaklists.size(); col++)
         {
     		tableCsv += "\"";
-    		tableCsv+=(peaklists.get(col).toString())+"\n";
+    		tableCsv+=(peaklists.get(col).toString());
     		//tableCsv+=(peaklists.get(col).jmsainfoName);
     		tableCsv+="\"";
     		OPeaklist peaklistCol = peaklists.get(col);

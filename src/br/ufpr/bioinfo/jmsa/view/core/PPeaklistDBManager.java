@@ -39,7 +39,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import com.sun.corba.se.spi.orbutil.fsm.Action;
+//import com.sun.corba.se.spi.orbutil.fsm.Action;
 
 import br.ufpr.bioinfo.jmsa.analyser.CPeaklistAnalyser;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
@@ -74,7 +74,7 @@ public class PPeaklistDBManager extends JPanel
     {
     	this.fmain = fmain;
     	spinner = new JSpinner();
-    	spinner.setValue(200);
+    	spinner.setValue(10);
     	
     	myContent.setLayout((LayoutManager) new BoxLayout(myContent, BoxLayout.Y_AXIS));
         //
@@ -281,30 +281,6 @@ public class PPeaklistDBManager extends JPanel
     	this.peaklists = peaklists;
     	myContent.removeAll();
     	if(this.peaklists.size() <= 0) return;
-//    	PPeaklistFiles newList = fmain.panelLoadingPeaklistFilesDB.clone();
-//    	newList.setMarkersVisibility(false);
-//    	newList.setGlobalTrigger(false);
-//    	newList.defaultTableModel.addTableModelListener(new TableModelListener()
-//        {
-//            @Override
-//            public void tableChanged(TableModelEvent e)
-//            {
-//
-//                int rowIndex = newList.table.getSelectedRow();
-//                int colIndex = newList.table.getSelectedColumn();
-//                
-//                if(colIndex == 1) {
-//                	OPeaklist peaklist = peaklists.get(rowIndex);
-//                	peaklist.reflex = !peaklist.reflex;
-//                	superSpectro.buildPlot(
-//                			peaklists,
-//                			fmain.checkBoxMenuItemPlotEnableIntensity.isSelected()
-//                	);
-//                	revalidate();
-//                }
-//        
-//            }
-//        });
     	
     	JPanel topPanel = new JPanel();
     	topPanel.setLayout(new GridLayout(1, 2));

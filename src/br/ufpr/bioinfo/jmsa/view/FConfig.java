@@ -18,6 +18,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import br.ufpr.bioinfo.jmsa.control.CConfig;
@@ -37,6 +38,10 @@ public class FConfig extends JDialog implements ActionListener
     public JButton buttonCancel = new JButton("Cancel");
     public JButton buttonLoadingPath = new JButton(SIconUtil.imageIconLoadingPath16);
     
+    private JPanel panelRawDataMergeSize = new JPanel();
+    private JLabel labelRawDataMergeSize = new JLabel("Raw Data Merge Size");
+    private JSpinner spinnerRawDataMergeSize = new JSpinner();
+    
     public FConfig()
     {
         super(FMainWindow.getInstance(), "Configuration", true);
@@ -46,28 +51,40 @@ public class FConfig extends JDialog implements ActionListener
         getRootPane().setDefaultButton(buttonOk);
         //
         //
-        setLayout(new BorderLayout(5, 5));
+        setLayout(new BorderLayout(6, 6));
         panelMain.setLayout(new BoxLayout(panelMain, BoxLayout.PAGE_AXIS));
         panelRowLookAndFeel.setLayout(new BoxLayout(panelRowLookAndFeel, BoxLayout.LINE_AXIS));
         panelRowLoadingPath.setLayout(new BoxLayout(panelRowLoadingPath, BoxLayout.LINE_AXIS));
+        panelRawDataMergeSize.setLayout(new BoxLayout(panelRawDataMergeSize, BoxLayout.LINE_AXIS));
         //
         //
         add(panelMain, BorderLayout.CENTER);
         add(panelBottom, BorderLayout.SOUTH);
         panelMain.add(panelRowLookAndFeel);
         panelMain.add(panelRowLoadingPath);
+        panelMain.add(panelRawDataMergeSize);
+        
         panelMain.add(Box.createHorizontalGlue());
+        
         panelRowLookAndFeel.add(labelLookAndFeel);
         panelRowLookAndFeel.add(comboboxLookAndFeel);
+        
         panelRowLoadingPath.add(labelLoadingPath);
         panelRowLoadingPath.add(textLoadingPath);
         panelRowLoadingPath.add(buttonLoadingPath);
+        
+        panelRawDataMergeSize.add(labelRawDataMergeSize);
+        panelRawDataMergeSize.add(spinnerRawDataMergeSize);
+        spinnerRawDataMergeSize.setValue(10);
+        
         panelBottom.add(buttonOk);
         panelBottom.add(buttonCancel);
         //
         //
         labelLookAndFeel.setHorizontalAlignment(JLabel.CENTER);
         labelLoadingPath.setHorizontalAlignment(JLabel.CENTER);
+        labelRawDataMergeSize.setHorizontalAlignment(JLabel.CENTER);
+        
         panelMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         //
         buttonOk.setIcon(SIconUtil.imageIconOk16);
@@ -106,9 +123,11 @@ public class FConfig extends JDialog implements ActionListener
         //
         labelLookAndFeel.setPreferredSize(new Dimension(100, labelLookAndFeel.getPreferredSize().height));
         labelLoadingPath.setPreferredSize(new Dimension(100, labelLoadingPath.getPreferredSize().height));
+        labelRawDataMergeSize.setPreferredSize(new Dimension(100, labelRawDataMergeSize.getPreferredSize().height));
         
         labelLookAndFeel.setMinimumSize(new Dimension(100, labelLookAndFeel.getPreferredSize().height));
         labelLoadingPath.setMinimumSize(new Dimension(100, labelLoadingPath.getPreferredSize().height));
+        labelRawDataMergeSize.setMinimumSize(new Dimension(100, labelRawDataMergeSize.getPreferredSize().height));
         //
         pack();
         setMinimumSize(getPreferredSize());
@@ -119,6 +138,7 @@ public class FConfig extends JDialog implements ActionListener
     public void readConfig()
     {
         textLoadingPath.setText(CConfig.getInstance().loadingPath);
+        spinnerRawDataMergeSize.setValue(CConfig.getInstance().rawDataMergeSize);
         comboboxLookAndFeel.setSelectedItem(CConfig.getInstance().getLookAndFeel());
     }
     
@@ -126,6 +146,7 @@ public class FConfig extends JDialog implements ActionListener
     {
         CConfig.getInstance().loadingPath = textLoadingPath.getText();
         CConfig.getInstance().setLookAndFeel((String) comboboxLookAndFeel.getSelectedItem());
+        CConfig.getInstance().rawDataMergeSize = (int)spinnerRawDataMergeSize.getValue();
         CConfig.getInstance().saveConfig();
     }
     

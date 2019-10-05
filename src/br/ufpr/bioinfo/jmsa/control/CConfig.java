@@ -14,15 +14,19 @@ public class CConfig
     public ResourceBundle rb = ResourceBundle.getBundle("br.ufpr.bioinfo.jmsa.resources.properties.MESSAGES");
     //
     //
+    public int rawDataMergeSize = 10;
     public String lookAndFeel = "";
     public boolean showMSName = true;
     public boolean showMSSpectrumID = true;
     public boolean showMSSpecies = true;
     public boolean showMSStrain = true;
+    public boolean showFilePath = true;
     public boolean plotTitleName = true;
     public boolean plotTitleSpectrumID = true;
     public boolean plotTitleSpecies = true;
     public boolean plotTitleStrain = true;
+    public boolean plotEnableIntensity = true;
+    public boolean plotEnableRawSpectre = false;
     
     //
     //OS Info
@@ -91,8 +95,12 @@ public class CConfig
         try
         {
             Wini wini = new Wini(new File(jmsadir + rb.getString("CONFIG.FILENAME")));
+            
             loadingPath = wini.get(rb.getString("CONFIG.SECTION"), "loadingPath", String.class);
             lookAndFeel = wini.get(rb.getString("CONFIG.SECTION"), "lookAndFeel", String.class);
+            if(wini.get(rb.getString("CONFIG.SECTION")).containsKey("RawDataMergeSize")) {            	
+            	rawDataMergeSize = (int)wini.get(rb.getString("CONFIG.SECTION"), "RawDataMergeSize", int.class);
+            }
             showMSName = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "ShowMSName", Boolean.class);
             showMSSpectrumID = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "ShowMSSpectrumID", Boolean.class);
             showMSSpecies = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "ShowMSSpecies", Boolean.class);
@@ -101,7 +109,10 @@ public class CConfig
             plotTitleSpectrumID = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotTitleSpectrumID", Boolean.class);
             plotTitleSpecies = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotTitleSpecies", Boolean.class);
             plotTitleStrain = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotTitleStrain", Boolean.class);
+            plotEnableIntensity = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotEnableIntensity", Boolean.class);
+            plotEnableRawSpectre = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "PlotEnableRawSpectre", Boolean.class);
             
+            showFilePath = (Boolean)wini.get(rb.getString("CONFIG.SECTION"), "ShowFilePath", Boolean.class);
         }
         catch (Exception e)
         {
@@ -116,6 +127,11 @@ public class CConfig
             Wini wini = new Wini(new File(jmsadir + rb.getString("CONFIG.FILENAME")));
             wini.put(rb.getString("CONFIG.SECTION"), "loadingPath", loadingPath);
             wini.put(rb.getString("CONFIG.SECTION"), "lookAndFeel", lookAndFeel);
+            if((int)wini.get(rb.getString("CONFIG.SECTION"), "RawDataMergeSize", int.class) != rawDataMergeSize
+            	&& plotEnableRawSpectre) {
+            	FMainWindow.getInstance().resetPlots();
+            }
+            wini.put(rb.getString("CONFIG.SECTION"), "RawDataMergeSize", rawDataMergeSize);
             wini.put(rb.getString("CONFIG.SECTION"), "ShowMSName", showMSName);
             wini.put(rb.getString("CONFIG.SECTION"), "ShowMSSpectrumID", showMSSpectrumID);
             wini.put(rb.getString("CONFIG.SECTION"), "ShowMSSpecies", showMSSpecies);
@@ -124,6 +140,9 @@ public class CConfig
             wini.put(rb.getString("CONFIG.SECTION"), "PlotTitleSpectrumID", plotTitleSpectrumID);
             wini.put(rb.getString("CONFIG.SECTION"), "PlotTitleSpecies", plotTitleSpecies);
             wini.put(rb.getString("CONFIG.SECTION"), "PlotTitleStrain", plotTitleStrain);
+            wini.put(rb.getString("CONFIG.SECTION"), "PlotEnableIntensity", plotEnableIntensity);
+            wini.put(rb.getString("CONFIG.SECTION"), "PlotEnableRawSpectre", plotEnableRawSpectre);
+            wini.put(rb.getString("CONFIG.SECTION"), "ShowFilePath", showFilePath);
             wini.store();
         }
         catch (Exception e)

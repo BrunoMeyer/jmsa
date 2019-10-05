@@ -53,10 +53,11 @@ public class PPeaklistFiles extends JPanel
     public FMainWindow fmain;
     public boolean globalTrigger = true;
     
-    
+    public int next_peak_id;
     public PPeaklistFiles(String title, FMainWindow fmain)
     {
     	this.fmain = fmain;
+    	this.next_peak_id = 1;
         setLayout(new BorderLayout(2, 2));
         //
         //
@@ -97,7 +98,7 @@ public class PPeaklistFiles extends JPanel
     
     public PPeaklistFiles clone() {
     	PPeaklistFiles newCopie = new PPeaklistFiles("DB Manager",this.fmain);
-    	List<OPeaklist> peaklists = fmain.panelLoadingPeaklistFiles.defaultTableModel.getAllPeaklists();
+    	List<OPeaklist> peaklists = this.defaultTableModel.getAllPeaklists();
     	for (OPeaklist peaklist : peaklists){
     		try {
 				OPeaklist copiePeaklist = new OPeaklist(peaklist.peaklistFile);
@@ -117,6 +118,7 @@ public class PPeaklistFiles extends JPanel
     
     public void clearTable()
     {
+    	next_peak_id = 1;
 //        SwingUtilities.invokeLater(new Runnable()
 //        {
 //            public void run()
@@ -135,6 +137,7 @@ public class PPeaklistFiles extends JPanel
     
     public void addPeaklistToTable(final OPeaklist peaklist)
     {
+    	peaklist.panel_id = next_peak_id++;
 //        SwingUtilities.invokeLater(new Runnable()
 //        {
 //            public void run()
@@ -174,9 +177,9 @@ public class PPeaklistFiles extends JPanel
     
     
     
-    public void setVisibleColumns(boolean showName, boolean showSpectrumID, boolean showSpecies, boolean showStrain)
+    public void setVisibleColumns(boolean showName, boolean showSpectrumID, boolean showSpecies, boolean showStrain, boolean showFilePath)
     {
-        Boolean[] columnsToShow = new Boolean[] { this.showMarkers, this.showMarkers, showName, showSpectrumID, showSpecies, showStrain };
+        Boolean[] columnsToShow = new Boolean[] { true, this.showMarkers, this.showMarkers, showName, showSpectrumID, showSpecies, showStrain, showFilePath };
         //
         
         TableColumnModel tableColumnModel = table.getColumnModel();
@@ -187,14 +190,10 @@ public class PPeaklistFiles extends JPanel
             tableColumnModel.removeColumn(tableColumn);
         }
         //
-        for (int columnsIndex = 0; columnsIndex < columnsToShow.length; columnsIndex++)
-        {
-            if (columnsToShow[columnsIndex])
-            {
-                for (int removedColumnsIndex = 0; removedColumnsIndex < removedColumns.size(); removedColumnsIndex++)
-                {
-                    if (removedColumns.get(removedColumnsIndex).getHeaderValue().equals(defaultTableModel.columnNames[columnsIndex]))
-                    {
+        for (int columnsIndex = 0; columnsIndex < columnsToShow.length; columnsIndex++){
+            if (columnsToShow[columnsIndex]){
+                for (int removedColumnsIndex = 0; removedColumnsIndex < removedColumns.size(); removedColumnsIndex++){
+                    if (removedColumns.get(removedColumnsIndex).getHeaderValue().equals(defaultTableModel.columnNames[columnsIndex])){
                         TableColumn tableColumn = removedColumns.get(removedColumnsIndex);
                         table.getColumnModel().addColumn(tableColumn);
                         removedColumns.remove(removedColumnsIndex);
@@ -211,11 +210,31 @@ public class PPeaklistFiles extends JPanel
     			fmain.checkBoxMenuItemShowMSName.isSelected(),
     			fmain.checkBoxMenuItemShowMSSpectrumID.isSelected(),
     			fmain.checkBoxMenuItemShowMSSpecies.isSelected(),
-    			fmain.checkBoxMenuItemShowMSStrain.isSelected()
+    			fmain.checkBoxMenuItemShowMSStrain.isSelected(),
+    			fmain.checkBoxMenuItemShowFilePath.isSelected()
     	);
     }
     
-    private void createFileOnZIP(
+    
+    // Just add an unique file to an ZipOutputStream
+    private void addFileToZIP(String file_name, String file_path, ZipOutputStream zos, byte[] buffer) throws IOException{
+    	ZipEntry ze;
+		ze = new ZipEntry(file_path);
+		zos.putNextEntry(ze);
+			
+		FileInputStream in = new FileInputStream(file_name);
+		
+		// This is needed to create the zip file
+		// The size of buffer defined before can be a future problem
+		int len;
+		while ((len = in.read(buffer)) > 0) {
+			zos.write(buffer, 0, len);
+		}
+		in.close();
+    }
+    
+    // Add an peaklist file to ZIP and this JMSA info if exists
+    private void createPeaklistOnZIP(
     		OPeaklist peaklist, ZipOutputStream zos,
     		byte[] buffer, JSONArray peaklists_json_array,
     		JSONArray superpeaks_json_array
@@ -237,32 +256,36 @@ public class PPeaklistFiles extends JPanel
 			
 			for (OPeaklist sp_peaklist : sp.peaklists){
 				sp_peaklists_json_array.add(sp_peaklist.spectrumid.toString());
-				createFileOnZIP(sp_peaklist, zos, buffer, peaklists_json_array, superpeaks_json_array);
+				createPeaklistOnZIP(sp_peaklist, zos, buffer, peaklists_json_array, superpeaks_json_array);
 			}
 			
 		}
 		else {
-			ZipEntry ze;
-	    	String file_name = peaklist.peaklistFile.toString();
+			
+			String file_name = peaklist.peaklistFile.toString();
 			String file_path = 
 					"files"+File.separator+peaklist.spectrumid.toString()+File.separator+"peaklist.xml";
-			ze = new ZipEntry(file_path);
-			zos.putNextEntry(ze);
 			
+			addFileToZIP(file_name, file_path, zos, buffer);
+			
+			if(peaklist.peaklistJMSAINFOFile.exists()) {
+				file_path = 
+						"files"+File.separator+peaklist.spectrumid.toString()+File.separator+"peaklist.xml.jmsainfo";
+				String file_name_info = peaklist.peaklistJMSAINFOFile.toString();
+				addFileToZIP(file_name_info, file_path, zos, buffer);
+			}
+			
+			if(peaklist.fidFile.exists()) {
+				file_path = 
+						"files"+File.separator+peaklist.spectrumid.toString()+File.separator+"fid";
+				String file_name_info = peaklist.fidFile.toString();
+				addFileToZIP(file_name_info, file_path, zos, buffer);
+			}
+				
 			JSONObject peak_obj = new JSONObject();
-			
 			peak_obj.put("id", peaklist.spectrumid.toString());
 			peak_obj.put("path", file_path);
 			
-			FileInputStream in = new FileInputStream(file_name);
-			
-			// This is needed to create the zip file
-			// The size of buffer defined before can be a future problem
-			int len;
-			while ((len = in.read(buffer)) > 0) {
-				zos.write(buffer, 0, len);
-			}
-			in.close();
 			peaklists_json_array.add(peak_obj);
 		}
     }
@@ -277,6 +300,13 @@ public class PPeaklistFiles extends JPanel
     }
     
     public void saveToZIP(String path_to_save) {
+    	List<OPeaklist> peaklists = new ArrayList<>(
+			this.defaultTableModel.getSelectedPeaklists()
+    	);
+    	saveToZIP(path_to_save, peaklists);
+    }
+    
+    public void saveToZIP(String path_to_save, List<OPeaklist> peaklists) {
     	// IMPORTANT: Any modification in this method
     	// can cause an incompatibility of versions on this program
     	// Please, do not change the file names created
@@ -284,9 +314,7 @@ public class PPeaklistFiles extends JPanel
     	try {
     		
     		// The copy is necessary because this list may be changed
-	    	List<OPeaklist> peaklists = new ArrayList<>(
-    			this.defaultTableModel.getSelectedPeaklists()
-	    	);
+	    	
 	    	
 	    	String zipFile = path_to_save;
 			
@@ -321,7 +349,7 @@ public class PPeaklistFiles extends JPanel
 			// If the peaklist instance was an superspectre, just add it on json file
 			
 			for (OPeaklist peaklist : peaklists){
-				createFileOnZIP(peaklist, zos, buffer, peaklists_json_array, superpeaks_json_array);
+				createPeaklistOnZIP(peaklist, zos, buffer, peaklists_json_array, superpeaks_json_array);
 			}
 			
 	
@@ -431,10 +459,9 @@ public class PPeaklistFiles extends JPanel
             fis.close();
             final JSONArray super_peaks = super_peaks_file;
             OUserActionLoadPeakFiles peaksLoader = new OUserActionLoadPeakFiles(
-        		new File[] {dir}, true
+        		new File[] {dir}
             );
             
-            PPeaklistFiles me = this;
             CallBackEvent afterLoadPeaklists = new CallBackEvent(){
                 public void callback() {
                 	if(super_peaks != null) {
@@ -476,13 +503,6 @@ public class PPeaklistFiles extends JPanel
             peaksLoader.executarEvento();
             FMainWindow.getInstance().updateVisibleColums();
             
-//            SwingUtilities.invokeLater(new Runnable()
-//            {
-//                public void run()
-//                {
-//                	
-//                }
-//            });
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -498,7 +518,7 @@ class PeaklistFilesTableStringCellRenderer extends DefaultTableCellRenderer
         PeaklistFilesTableModel model = (PeaklistFilesTableModel) table.getModel();
         OPeaklist peaklist = model.getPeaklistAt(row);
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        c.setForeground(peaklist.spectrumForegroundColor);
+        if(peaklist != null) c.setForeground(peaklist.spectrumForegroundColor);
         return c;
     }
 }
