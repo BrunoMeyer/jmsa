@@ -12,11 +12,11 @@ import javax.swing.SwingUtilities;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
-import br.ufpr.bioinfo.jmsa.model.event.useraction.OEvento.CallBackEvent;
+import br.ufpr.bioinfo.jmsa.model.event.useraction.OEvent.CallBackEvent;
 import br.ufpr.bioinfo.jmsa.utils.CUtils;
 import br.ufpr.bioinfo.jmsa.view.FMainWindow;
 
-public class OUserActionLoadPeakFiles implements OEvento
+public class OUserActionLoadPeakFiles implements OEvent
 {
 	
     public File[] seletedFolders;
@@ -47,7 +47,7 @@ public class OUserActionLoadPeakFiles implements OEvento
 
     
     @Override
-    public synchronized void executarEvento()
+    public synchronized void executeEvent()
     {
         //TODO MALTON: Teste de Tempo
         long start = System.currentTimeMillis();

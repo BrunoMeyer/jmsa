@@ -1,9 +1,9 @@
 package br.ufpr.bioinfo.jmsa.model.event.useraction;
 
 
-public interface OEvento
+public interface OEvent
 {
-    public void executarEvento();
+    public void executeEvent();
     
     public interface CallBackEvent{
         void callback();

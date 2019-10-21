@@ -73,18 +73,18 @@ public class OPeaklist
     public OPeaklist(File peaklistFile) throws ParserConfigurationException, SAXException, IOException
     {
         this.peaklistFile = peaklistFile;
+        if(peaklistFile != null) {
+        	// Try to load fid file in the peaklist directory (only when load from zip)
+            String rowSpectreDataPath = (String) peaklistFile.getParentFile().toString();
+            fidFile = new File(Paths.get(rowSpectreDataPath, "fid").toString());
+            
+            // Otherwise, verify the original data, that is three directories "up"
+            if(!fidFile.exists()) {
+        		rowSpectreDataPath = (String) peaklistFile.getParentFile().getParentFile().getParentFile().toString();
+        		fidFile = new File(Paths.get(rowSpectreDataPath, "fid").toString());
+        	}
+        }
         
-        // Try to load fid file in the peaklist directory (only when load from zip)
-        String rowSpectreDataPath = (String) peaklistFile.getParentFile().toString();
-        fidFile = new File(Paths.get(rowSpectreDataPath, "fid").toString());
-        
-        // Otherwise, verify the original data, that is three directories "up"
-        if(!fidFile.exists()) {
-    		rowSpectreDataPath = (String) peaklistFile.getParentFile().getParentFile().getParentFile().toString();
-    		fidFile = new File(Paths.get(rowSpectreDataPath, "fid").toString());
-    	}
-        
-        		
         //
         readXML();
         readJMSAINFO();
@@ -93,21 +93,24 @@ public class OPeaklist
         //
         if (valid)
         {
-            int hash = spectrumid.hashCode();
-            int r = (hash & 0xFF0000) >> 16;
-            int g = (hash & 0x00FF00) >> 8;
-            int b = hash & 0x0000FF;
-            spectrumForegroundColor = new Color(r, g, b);
-            spectrumBackgroundColor = new Color(255 - r, 255 - g, 255 - b);
-            
-            panel_id = countId.incrementAndGet();
+            setColor();
         }
         else
         {
             System.out.println("Peaklist inválido: " + peaklistFile.getAbsolutePath());
         }
     }
-
+    
+    public void setColor() {
+    	int hash = spectrumid.hashCode();
+        int r = (hash & 0xFF0000) >> 16;
+        int g = (hash & 0x00FF00) >> 8;
+        int b = hash & 0x0000FF;
+        spectrumForegroundColor = new Color(r, g, b);
+        spectrumBackgroundColor = new Color(255 - r, 255 - g, 255 - b);
+        
+        panel_id = countId.incrementAndGet();
+    }
     
     public ArrayList<OPeak> getPeaks() {
     	return this.peaks;

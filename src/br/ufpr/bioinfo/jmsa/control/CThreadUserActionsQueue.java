@@ -4,7 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.Queue;
-import br.ufpr.bioinfo.jmsa.model.event.useraction.OEvento;
+import br.ufpr.bioinfo.jmsa.model.event.useraction.OEvent;
 
 public class CThreadUserActionsQueue extends Thread
 {
@@ -19,7 +19,7 @@ public class CThreadUserActionsQueue extends Thread
     @Override
     public void run()
     {
-        while (this.isRodando())
+        while (this.isRunning())
         {
             if (this.events.isEmpty())
             {
@@ -35,8 +35,8 @@ public class CThreadUserActionsQueue extends Thread
             }
             try
             {
-                OEvento obj = (OEvento) this.events.poll();
-                obj.executarEvento();
+                OEvent obj = (OEvent) this.events.poll();
+                obj.executeEvent();
             }
             catch (Exception e)
             {
@@ -54,18 +54,18 @@ public class CThreadUserActionsQueue extends Thread
         }
     }
     
-    public synchronized void setRodando(boolean isAlive)
+    public synchronized void setRunning(boolean isAlive)
     {
         this.running = isAlive;
     }
     
-    public synchronized boolean isRodando()
+    public synchronized boolean isRunning()
     {
         return this.running;
     }
     
-    public synchronized void addEvento(Object evento)
+    public synchronized void addEvento(Object event)
     {
-        this.events.add(evento);
+        this.events.add(event);
     }
 }
