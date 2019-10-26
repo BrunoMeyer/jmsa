@@ -751,14 +751,18 @@ public class FMainWindow extends JFrame
     public List<OPeaklist> getLoadingSelectedPeaklists() {
     	List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getSelectedPeaklists();
 		List<OPeaklist> superpeaklists = panelSpectraPeaklistFilesSS.defaultTableModel.getSelectedPeaklists();
-    	peaklists.addAll(superpeaklists);
-    	return peaklists;
+    	ArrayList<OPeaklist> merged = new ArrayList<OPeaklist>();
+    	merged.addAll(peaklists);
+    	merged.addAll(superpeaklists);
+    	return merged;
     }
     public List<OPeaklist> getLoadingPeaklists() {
     	List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getAllPeaklists();
 		List<OPeaklist> superpeaklists = panelSpectraPeaklistFilesSS.defaultTableModel.getAllPeaklists();
-    	peaklists.addAll(superpeaklists);
-    	return peaklists;
+		ArrayList<OPeaklist> merged = new ArrayList<OPeaklist>();
+    	merged.addAll(peaklists);
+    	merged.addAll(superpeaklists);
+    	return merged;
     }
     
     public void firePeaklistPanelChange() {
