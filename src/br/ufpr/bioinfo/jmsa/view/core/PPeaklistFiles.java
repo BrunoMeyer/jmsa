@@ -347,7 +347,7 @@ public class PPeaklistFiles extends JPanel
 			JSONArray peaklists_json_array = new JSONArray();
 			
 			// Array on format like: [
-			// 	{"id":"SE-superspectre1", "peaklists_ids":["superspectre1","superspectre2", ...]},
+			// 	{"id":"SS-superspectre1", "peaklists_ids":["superspectre1","superspectre2", ...]},
 			// 	...
 			// ]
 			JSONArray superpeaks_json_array = new JSONArray();

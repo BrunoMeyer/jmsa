@@ -67,7 +67,7 @@ public class PPeaklistDBManager extends JPanel
     
     private JSpinner spinner;
     
-    public PPeaklistPlot superSpectroPlot;
+    public PPeaklistPlot superSpectrePlot;
     public SuperPeaklist superpeaklist;
     
     public PPeaklistDBManager(FMainWindow fmain)
@@ -250,19 +250,19 @@ public class PPeaklistDBManager extends JPanel
     public void reloadSuperSpectrePlot() {
     	if(this.peaklists.size() <= 0) return;
     	try {
-    		if(this.superSpectroPlot != null) myContent.remove(this.superSpectroPlot);
+    		if(this.superSpectrePlot != null) myContent.remove(this.superSpectrePlot);
 			this.superpeaklist = new SuperPeaklist(this.peaklists.get(0).peaklistFile);
 			for(OPeaklist pk : this.peaklists) {
 				this.superpeaklist.addPeaklist(pk);
 	        }
 			superpeaklist.setDistanceMergePeak((int)spinner.getValue());
 			
-			this.superSpectroPlot = new PPeaklistPlot(
+			this.superSpectrePlot = new PPeaklistPlot(
 				this.superpeaklist,
 				fmain.checkBoxMenuItemPlotEnableIntensity.isSelected()
 			);
-			this.superSpectroPlot.setLayout(new GridLayout(1, 0));
-			this.myContent.add(this.superSpectroPlot);
+			this.superSpectrePlot.setLayout(new GridLayout(1, 0));
+			this.myContent.add(this.superSpectrePlot);
 			this.myContent.revalidate();
 			this.myContent.repaint();
 		} catch (ParserConfigurationException e1) {
