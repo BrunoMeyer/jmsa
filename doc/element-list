@@ -1,0 +1,9 @@
+algorithm.clustering
+algorithm.clustering.visualization
+br.ufpr.bioinfo.jmsa.analyser
+br.ufpr.bioinfo.jmsa.control
+br.ufpr.bioinfo.jmsa.model
+br.ufpr.bioinfo.jmsa.model.event.useraction
+br.ufpr.bioinfo.jmsa.utils
+br.ufpr.bioinfo.jmsa.view
+br.ufpr.bioinfo.jmsa.view.core
