@@ -514,7 +514,7 @@ public class FMainWindow extends JFrame
                     	);
                     	filter = new FileNameExtensionFilter(null, "zip");
                     	chooserSave.setFileFilter(filter);
-                        chooserSave.setSelectedFile(new File("database_name.jmsadb.zip"));
+                        chooserSave.setSelectedFile(new File("database_name.jmsadb"));
                         
                     	retrival = chooserSave.showSaveDialog(null);
                         
