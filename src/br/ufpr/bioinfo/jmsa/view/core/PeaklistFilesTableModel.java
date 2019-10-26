@@ -3,12 +3,15 @@ package br.ufpr.bioinfo.jmsa.view.core;
 import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
+import br.ufpr.bioinfo.jmsa.model.SuperPeaklist;
 
 public class PeaklistFilesTableModel extends AbstractTableModel
 {
     public ArrayList<OPeaklist> peaklists = new ArrayList<OPeaklist>();
-    public String[] columnNames = new String[] { "TemporaryID", "Selected", "Reflex", "Name", "SpectrumID", "Species", "Strain", "File Path" };
-    public boolean globalTrigger = true;
+    public String[] columnNames = new String[] { "TemporaryID", "Selected", "Reflex", "Name", "SpectrumID", "Species", "Strain", "File Path", "Total Spectres"};
+    public boolean globalTrigger = true; // boolean used to cause or prevent triggers when use interact with table
+    public boolean isSuperSpectre = false;
+    
     public PeaklistFilesTableModel()
     {
     }
@@ -17,6 +20,7 @@ public class PeaklistFilesTableModel extends AbstractTableModel
     {
     	this.globalTrigger = globalTrigger;
     }
+    
     
     public void addPeaklist(OPeaklist peaklist)
     {
@@ -122,6 +126,14 @@ public class PeaklistFilesTableModel extends AbstractTableModel
                 case 7:
                     value = peaklist.localPath.toString();
                     break;
+                case 8:
+                	if(peaklist instanceof SuperPeaklist) {                		
+                		value = ((SuperPeaklist)(peaklist)).peaklists.size();
+                	}
+                	else {
+                		value = "Individual Spectre";
+                	}
+                	break;
                 default:
                     value = peaklist.spectrumid;
                     break;

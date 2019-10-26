@@ -123,6 +123,7 @@ public class FMainWindow extends JFrame
     public JCheckBoxMenuItem checkBoxMenuItemShowMSSpecies = new JCheckBoxMenuItem("Show Species", CConfig.getInstance().showMSSpecies);
     public JCheckBoxMenuItem checkBoxMenuItemShowMSStrain = new JCheckBoxMenuItem("Show Strain", CConfig.getInstance().showMSStrain);
     public JCheckBoxMenuItem checkBoxMenuItemShowFilePath = new JCheckBoxMenuItem("Show File Path", CConfig.getInstance().showFilePath);
+    public JCheckBoxMenuItem checkBoxMenuItemShowSuperSpectreSize = new JCheckBoxMenuItem("Show SuperSpectre Size (total of individual spectres)", CConfig.getInstance().showFilePath);
     public JCheckBoxMenuItem checkBoxMenuItemPlotTitleName = new JCheckBoxMenuItem("Name", CConfig.getInstance().plotTitleName);
     public JCheckBoxMenuItem checkBoxMenuItemPlotTitleSpectrumID = new JCheckBoxMenuItem("SpectrumID", CConfig.getInstance().plotTitleSpectrumID);
     public JCheckBoxMenuItem checkBoxMenuItemPlotTitleSpecies = new JCheckBoxMenuItem("Species", CConfig.getInstance().plotTitleSpecies);
@@ -206,6 +207,7 @@ public class FMainWindow extends JFrame
         menuShowColumns.add(checkBoxMenuItemShowMSSpecies);
         menuShowColumns.add(checkBoxMenuItemShowMSStrain);
         menuShowColumns.add(checkBoxMenuItemShowFilePath);
+        menuShowColumns.add(checkBoxMenuItemShowSuperSpectreSize);
         menuPlotTitle.add(checkBoxMenuItemPlotTitleName);
         menuPlotTitle.add(checkBoxMenuItemPlotTitleSpectrumID);
         menuPlotTitle.add(checkBoxMenuItemPlotTitleSpecies);
@@ -443,6 +445,7 @@ public class FMainWindow extends JFrame
                     case "ShowMSSpecies":
                     case "ShowMSStrain":
                     case "ShowFilePath":
+                    case "ShowSuperSpectreSize":
                     case "PlotTitleName":
                     case "PlotTitleSpectrumID":
                     case "PlotTitleSpecies":
@@ -454,6 +457,7 @@ public class FMainWindow extends JFrame
                         CConfig.getInstance().showMSSpecies = checkBoxMenuItemShowMSSpecies.isSelected();
                         CConfig.getInstance().showMSStrain = checkBoxMenuItemShowMSStrain.isSelected();
                         CConfig.getInstance().showFilePath = checkBoxMenuItemShowFilePath.isSelected();
+                        CConfig.getInstance().showSuperSpectreSize = checkBoxMenuItemShowSuperSpectreSize.isSelected();
                         CConfig.getInstance().plotTitleName = checkBoxMenuItemPlotTitleName.isSelected();
                         CConfig.getInstance().plotTitleSpectrumID = checkBoxMenuItemPlotTitleSpectrumID.isSelected();
                         CConfig.getInstance().plotTitleSpecies = checkBoxMenuItemPlotTitleSpecies.isSelected();
@@ -633,12 +637,15 @@ public class FMainWindow extends JFrame
         checkBoxMenuItemShowMSSpecies.setActionCommand("ShowMSSpecies");
         checkBoxMenuItemShowMSStrain.setActionCommand("ShowMSStrain");
         checkBoxMenuItemShowFilePath.setActionCommand("ShowFilePath");
+        checkBoxMenuItemShowSuperSpectreSize.setActionCommand("ShowSuperSpectreSize");
+        
         //
         checkBoxMenuItemShowMSName.addActionListener(actionListener);
         checkBoxMenuItemShowMSSpectrumID.addActionListener(actionListener);
         checkBoxMenuItemShowMSSpecies.addActionListener(actionListener);
         checkBoxMenuItemShowMSStrain.addActionListener(actionListener);
         checkBoxMenuItemShowFilePath.addActionListener(actionListener);
+        checkBoxMenuItemShowSuperSpectreSize.addActionListener(actionListener);
         //
         checkBoxMenuItemPlotTitleName.setActionCommand("PlotTitleName");
         checkBoxMenuItemPlotTitleSpectrumID.setActionCommand("PlotTitleSpectrumID");
@@ -870,21 +877,24 @@ public class FMainWindow extends JFrame
         		checkBoxMenuItemShowMSSpectrumID.isSelected(),
         		checkBoxMenuItemShowMSSpecies.isSelected(),
         		checkBoxMenuItemShowMSStrain.isSelected(),
-        		checkBoxMenuItemShowFilePath.isSelected()
+        		checkBoxMenuItemShowFilePath.isSelected(),
+        		checkBoxMenuItemShowSuperSpectreSize.isSelected()
         );
     	panelSpectraPeaklistFilesSS.setVisibleColumns(
         		checkBoxMenuItemShowMSName.isSelected(),
         		checkBoxMenuItemShowMSSpectrumID.isSelected(),
         		checkBoxMenuItemShowMSSpecies.isSelected(),
         		checkBoxMenuItemShowMSStrain.isSelected(),
-        		checkBoxMenuItemShowFilePath.isSelected()
+        		checkBoxMenuItemShowFilePath.isSelected(),
+        		checkBoxMenuItemShowSuperSpectreSize.isSelected()
         );
         panelSpectraPeaklistFilesDB.setVisibleColumns(
         		checkBoxMenuItemShowMSName.isSelected(),
         		checkBoxMenuItemShowMSSpectrumID.isSelected(),
         		checkBoxMenuItemShowMSSpecies.isSelected(),
         		checkBoxMenuItemShowMSStrain.isSelected(),
-        		checkBoxMenuItemShowFilePath.isSelected()
+        		checkBoxMenuItemShowFilePath.isSelected(),
+        		checkBoxMenuItemShowSuperSpectreSize.isSelected()
         );
         
         if(isDBSelected()) {

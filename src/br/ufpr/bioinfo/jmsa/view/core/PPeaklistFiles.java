@@ -58,7 +58,22 @@ public class PPeaklistFiles extends JPanel
     {
     	this.fmain = fmain;
     	this.next_peak_id = 1;
-        setLayout(new BorderLayout(2, 2));
+        
+        setDefaultLayout();
+        setTableModelListener();
+    }
+    
+    public PPeaklistFiles(String title, FMainWindow fmain, boolean set_listener)
+    {
+    	this.fmain = fmain;
+    	this.next_peak_id = 1;
+        
+        setDefaultLayout();
+        if(set_listener) setTableModelListener();
+    }
+    
+    public void setDefaultLayout() {
+    	setLayout(new BorderLayout(2, 2));
         //
         //
         add(scrollPanePeaklistFiles, BorderLayout.CENTER);
@@ -72,7 +87,16 @@ public class PPeaklistFiles extends JPanel
         table.setDefaultRenderer(String.class, new PeaklistFilesTableStringCellRenderer());
         //
         //
-        defaultTableModel.addTableModelListener(new TableModelListener()
+        
+        //
+        //
+        scrollPanePeaklistFiles.setMinimumSize(new Dimension(200, 0));
+        scrollPanePeaklistFiles.setPreferredSize(new Dimension(200, 0));
+    }
+    
+    
+    public void setTableModelListener() {
+    	defaultTableModel.addTableModelListener(new TableModelListener()
         {
             @Override
             public void tableChanged(TableModelEvent e)
@@ -88,12 +112,6 @@ public class PPeaklistFiles extends JPanel
                 labelStatusBarPeaklistFiles.setText(defaultTableModel.getSelectedPeaklists().size() + "/" + defaultTableModel.getRowCount());
             }
         });
-        //
-        //
-        scrollPanePeaklistFiles.setMinimumSize(new Dimension(200, 0));
-        scrollPanePeaklistFiles.setPreferredSize(new Dimension(200, 0));
-        
-        
     }
     
     public PPeaklistFiles clone() {
@@ -177,9 +195,9 @@ public class PPeaklistFiles extends JPanel
     
     
     
-    public void setVisibleColumns(boolean showName, boolean showSpectrumID, boolean showSpecies, boolean showStrain, boolean showFilePath)
+    public void setVisibleColumns(boolean showName, boolean showSpectrumID, boolean showSpecies, boolean showStrain, boolean showFilePath, boolean showSuperSpectreSize)
     {
-        Boolean[] columnsToShow = new Boolean[] { true, this.showMarkers, this.showMarkers, showName, showSpectrumID, showSpecies, showStrain, showFilePath };
+        Boolean[] columnsToShow = new Boolean[] { true, this.showMarkers, this.showMarkers, showName, showSpectrumID, showSpecies, showStrain, showFilePath, showSuperSpectreSize};
         //
         
         TableColumnModel tableColumnModel = table.getColumnModel();
@@ -211,7 +229,8 @@ public class PPeaklistFiles extends JPanel
     			fmain.checkBoxMenuItemShowMSSpectrumID.isSelected(),
     			fmain.checkBoxMenuItemShowMSSpecies.isSelected(),
     			fmain.checkBoxMenuItemShowMSStrain.isSelected(),
-    			fmain.checkBoxMenuItemShowFilePath.isSelected()
+    			fmain.checkBoxMenuItemShowFilePath.isSelected(),
+    			fmain.checkBoxMenuItemShowSuperSpectreSize.isSelected()
     	);
     }
     

@@ -14,12 +14,14 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
+import br.ufpr.bioinfo.jmsa.model.SuperPeaklist;
 
 public class PPeaklistInfo extends JPanel implements ActionListener
 {
@@ -40,7 +42,9 @@ public class PPeaklistInfo extends JPanel implements ActionListener
     private JPanel panelRowStrain = new JPanel();
     private JPanel panelRowNotes = new JPanel();;
     private JPanel panelRowDNA = new JPanel();
+    private JPanel panelRowSSList = new JPanel();
     private JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    
     private JLabel labelSpectrumID = new JLabel("SpectrumID");
     private JLabel labelTempID = new JLabel("TemporaryID");
     private JLabel labelDate = new JLabel("Date");
@@ -51,6 +55,7 @@ public class PPeaklistInfo extends JPanel implements ActionListener
     private JLabel labelSpecie = new JLabel("Specie");
     private JLabel labelStrain = new JLabel("Strain");
     private JLabel labelNotes = new JLabel("Notes");
+    private JLabel labelSSList = new JLabel("Spectres from Super Spectre");
     private JLabel labelDNA = new JLabel("DNA");
     private JTextField textSpectrumID = new JTextField();
     private JTextField textTempID = new JTextField();
@@ -74,7 +79,7 @@ public class PPeaklistInfo extends JPanel implements ActionListener
         setAlignmentX(JPanel.CENTER_ALIGNMENT);
         //
         //
-        setLayout(new BorderLayout(5, 5));
+        setLayout(new BorderLayout(6, 6));
         panelMain.setLayout(new BoxLayout(panelMain, BoxLayout.PAGE_AXIS));
         panelRowSpectrumID.setLayout(new BoxLayout(panelRowSpectrumID, BoxLayout.LINE_AXIS));
         panelRowTempID.setLayout(new BoxLayout(panelRowTempID, BoxLayout.LINE_AXIS));
@@ -87,6 +92,7 @@ public class PPeaklistInfo extends JPanel implements ActionListener
         panelRowStrain.setLayout(new BoxLayout(panelRowStrain, BoxLayout.LINE_AXIS));
         panelRowNotes.setLayout(new BoxLayout(panelRowNotes, BoxLayout.LINE_AXIS));
         panelRowDNA.setLayout(new BoxLayout(panelRowDNA, BoxLayout.LINE_AXIS));
+        panelRowSSList.setLayout(new BoxLayout(panelRowSSList, BoxLayout.LINE_AXIS));
         //
         //
         add(panelMain, BorderLayout.CENTER);
@@ -103,6 +109,7 @@ public class PPeaklistInfo extends JPanel implements ActionListener
         panelMain.add(panelRowStrain);
         panelMain.add(panelRowNotes);
         panelMain.add(panelRowDNA);
+        panelMain.add(panelRowSSList);
         panelMain.add(Box.createHorizontalGlue());
         panelRowSpectrumID.add(labelSpectrumID);
         panelRowSpectrumID.add(textSpectrumID);
@@ -128,6 +135,35 @@ public class PPeaklistInfo extends JPanel implements ActionListener
         panelRowDNA.add(textDNA);
         panelBottom.add(buttonOk);
         panelBottom.add(buttonReset);
+        
+
+        if(peaklist instanceof SuperPeaklist) {
+        	SuperPeaklist sspeaklist = (SuperPeaklist) peaklist;
+        	PPeaklistFiles superPeaklistTable = new PPeaklistFiles("Subspectres of "+peaklist.toString(), FMainWindow.getInstance(), false);
+        	superPeaklistTable.setMarkersVisibility(false);
+        	
+        	for (OPeaklist p : sspeaklist.peaklists){
+        		superPeaklistTable.defaultTableModel.addRow(p);
+        	}
+        	
+        	superPeaklistTable.setVisibleColumns( 
+        			FMainWindow.getInstance().checkBoxMenuItemShowMSName.isSelected(),
+        			FMainWindow.getInstance().checkBoxMenuItemShowMSSpectrumID.isSelected(),
+        			FMainWindow.getInstance().checkBoxMenuItemShowMSSpecies.isSelected(),
+        			FMainWindow.getInstance().checkBoxMenuItemShowMSStrain.isSelected(),
+        			FMainWindow.getInstance().checkBoxMenuItemShowFilePath.isSelected(),
+        			FMainWindow.getInstance().checkBoxMenuItemShowSuperSpectreSize.isSelected()
+        	);
+        	labelSSList.setText("<html><p style=\"width:100px\">"+labelSSList.getText()+"</p></html>");
+        	panelRowSSList.add(labelSSList);
+        	
+        	superPeaklistTable.setPreferredSize(new Dimension(30, 100));
+        	superPeaklistTable.setMinimumSize(new Dimension(30, 100));
+//        	superPeaklistTable.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+        	panelRowSSList.add(superPeaklistTable);
+        	
+        }
+        
         //
         //
         panelMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -142,6 +178,7 @@ public class PPeaklistInfo extends JPanel implements ActionListener
         labelSpecie.setHorizontalAlignment(JLabel.CENTER);
         labelStrain.setHorizontalAlignment(JLabel.CENTER);
         labelNotes.setHorizontalAlignment(JLabel.CENTER);
+        labelSSList.setHorizontalAlignment(JLabel.CENTER);
         labelDNA.setHorizontalAlignment(JLabel.CENTER);
         //
         //
@@ -166,6 +203,7 @@ public class PPeaklistInfo extends JPanel implements ActionListener
         panelRowSpecie.setMaximumSize(new Dimension(Integer.MAX_VALUE, panelRowSpecie.getPreferredSize().height));
         panelRowStrain.setMaximumSize(new Dimension(Integer.MAX_VALUE, panelRowStrain.getPreferredSize().height));
 //        panelRowNotes.setMaximumSize(new Dimension(Integer.MAX_VALUE, panelRowNotes.getPreferredSize().height));
+        panelRowSSList.setMinimumSize(new Dimension(panelRowSSList.getPreferredSize().width, 100));
         labelSpectrumID.setPreferredSize(new Dimension(labelWidth, labelSpectrumID.getPreferredSize().height));
         labelTempID.setPreferredSize(new Dimension(labelWidth, labelSpectrumID.getPreferredSize().height));
         labelDate.setPreferredSize(new Dimension(labelWidth, labelDate.getPreferredSize().height));
@@ -176,6 +214,7 @@ public class PPeaklistInfo extends JPanel implements ActionListener
         labelSpecie.setPreferredSize(new Dimension(labelWidth, labelSpecie.getPreferredSize().height));
         labelStrain.setPreferredSize(new Dimension(labelWidth, labelStrain.getPreferredSize().height));
         labelNotes.setPreferredSize(new Dimension(labelWidth, labelNotes.getPreferredSize().height));
+        labelSSList.setPreferredSize(new Dimension(labelWidth, labelSSList.getPreferredSize().height));
         labelDNA.setPreferredSize(new Dimension(labelWidth, labelDNA.getPreferredSize().height));
         //
         //
@@ -206,6 +245,9 @@ public class PPeaklistInfo extends JPanel implements ActionListener
         textDNA.setBorder(BorderFactory.createCompoundBorder(border, 
 				BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         panelRowDNA.setBorder(new EmptyBorder(0, 0, 10, 10));
+        
+        
+        validate();
     }
     
     public void readConfig()
