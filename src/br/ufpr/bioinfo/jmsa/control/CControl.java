@@ -31,7 +31,7 @@ public class CControl
         {
             if (threadUserActionsPool != null)
             {
-                threadUserActionsPool.setRodando(false);
+                threadUserActionsPool.setRunning(false);
                 threadUserActionsPool.join(5000);
             }
         }

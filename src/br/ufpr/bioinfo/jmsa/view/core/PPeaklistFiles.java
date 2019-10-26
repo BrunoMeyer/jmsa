@@ -39,7 +39,7 @@ import org.xml.sax.SAXException;
 import br.ufpr.bioinfo.jmsa.model.OPeaklist;
 import br.ufpr.bioinfo.jmsa.model.SuperPeaklist;
 import br.ufpr.bioinfo.jmsa.model.event.useraction.OUserActionLoadPeakFiles;
-import br.ufpr.bioinfo.jmsa.model.event.useraction.OEvento.CallBackEvent;
+import br.ufpr.bioinfo.jmsa.model.event.useraction.OEvent.CallBackEvent;
 import br.ufpr.bioinfo.jmsa.view.FMainWindow;
 
 public class PPeaklistFiles extends JPanel
@@ -58,7 +58,22 @@ public class PPeaklistFiles extends JPanel
     {
     	this.fmain = fmain;
     	this.next_peak_id = 1;
-        setLayout(new BorderLayout(2, 2));
+        
+        setDefaultLayout();
+        setTableModelListener();
+    }
+    
+    public PPeaklistFiles(String title, FMainWindow fmain, boolean set_listener)
+    {
+    	this.fmain = fmain;
+    	this.next_peak_id = 1;
+        
+        setDefaultLayout();
+        if(set_listener) setTableModelListener();
+    }
+    
+    public void setDefaultLayout() {
+    	setLayout(new BorderLayout(2, 2));
         //
         //
         add(scrollPanePeaklistFiles, BorderLayout.CENTER);
@@ -72,7 +87,16 @@ public class PPeaklistFiles extends JPanel
         table.setDefaultRenderer(String.class, new PeaklistFilesTableStringCellRenderer());
         //
         //
-        defaultTableModel.addTableModelListener(new TableModelListener()
+        
+        //
+        //
+        scrollPanePeaklistFiles.setMinimumSize(new Dimension(200, 0));
+        scrollPanePeaklistFiles.setPreferredSize(new Dimension(200, 0));
+    }
+    
+    
+    public void setTableModelListener() {
+    	defaultTableModel.addTableModelListener(new TableModelListener()
         {
             @Override
             public void tableChanged(TableModelEvent e)
@@ -88,12 +112,6 @@ public class PPeaklistFiles extends JPanel
                 labelStatusBarPeaklistFiles.setText(defaultTableModel.getSelectedPeaklists().size() + "/" + defaultTableModel.getRowCount());
             }
         });
-        //
-        //
-        scrollPanePeaklistFiles.setMinimumSize(new Dimension(200, 0));
-        scrollPanePeaklistFiles.setPreferredSize(new Dimension(200, 0));
-        
-        
     }
     
     public PPeaklistFiles clone() {
@@ -177,9 +195,9 @@ public class PPeaklistFiles extends JPanel
     
     
     
-    public void setVisibleColumns(boolean showName, boolean showSpectrumID, boolean showSpecies, boolean showStrain, boolean showFilePath)
+    public void setVisibleColumns(boolean showName, boolean showSpectrumID, boolean showSpecies, boolean showStrain, boolean showFilePath, boolean showSuperSpectreSize)
     {
-        Boolean[] columnsToShow = new Boolean[] { true, this.showMarkers, this.showMarkers, showName, showSpectrumID, showSpecies, showStrain, showFilePath };
+        Boolean[] columnsToShow = new Boolean[] { true, this.showMarkers, this.showMarkers, showName, showSpectrumID, showSpecies, showStrain, showFilePath, showSuperSpectreSize};
         //
         
         TableColumnModel tableColumnModel = table.getColumnModel();
@@ -211,7 +229,8 @@ public class PPeaklistFiles extends JPanel
     			fmain.checkBoxMenuItemShowMSSpectrumID.isSelected(),
     			fmain.checkBoxMenuItemShowMSSpecies.isSelected(),
     			fmain.checkBoxMenuItemShowMSStrain.isSelected(),
-    			fmain.checkBoxMenuItemShowFilePath.isSelected()
+    			fmain.checkBoxMenuItemShowFilePath.isSelected(),
+    			fmain.checkBoxMenuItemShowSuperSpectreSize.isSelected()
     	);
     }
     
@@ -241,6 +260,8 @@ public class PPeaklistFiles extends JPanel
     		) throws IOException {
     	
     	boolean already_saved = isPeakInJSONObject(peaklist, peaklists_json_array);
+    	
+    	// Prevent duplicated saves
     	already_saved = already_saved || isPeakInJSONObject(peaklist, superpeaks_json_array);
     	if(already_saved) return;
 		
@@ -249,9 +270,14 @@ public class PPeaklistFiles extends JPanel
 			SuperPeaklist sp = (SuperPeaklist) peaklist;			
 			JSONArray sp_peaklists_json_array = new JSONArray();
 			JSONObject super_peak_obj = new JSONObject();
-			super_peak_obj.put("id", sp.toString());
+			super_peak_obj.put("id", sp.spectrumid);
 			super_peak_obj.put("peaklists_ids", sp_peaklists_json_array);
 			super_peak_obj.put("distance_merge_peak", sp.distance_merge_peak);
+			super_peak_obj.put("jmsainfoName", sp.jmsainfoName);
+			super_peak_obj.put("jmsainfoSpecie", sp.jmsainfoSpecie);
+			super_peak_obj.put("jmsainfoStrain", sp.jmsainfoStrain);
+			super_peak_obj.put("jmsainfoNotes", sp.jmsainfoNotes);
+			super_peak_obj.put("jmsainfoDNA", sp.jmsainfoDNA);
 			superpeaks_json_array.add(super_peak_obj);
 			
 			for (OPeaklist sp_peaklist : sp.peaklists){
@@ -340,7 +366,7 @@ public class PPeaklistFiles extends JPanel
 			JSONArray peaklists_json_array = new JSONArray();
 			
 			// Array on format like: [
-			// 	{"id":"SE-superspectre1", "peaklists_ids":["superspectre1","superspectre2", ...]},
+			// 	{"id":"SS-superspectre1", "peaklists_ids":["superspectre1","superspectre2", ...]},
 			// 	...
 			// ]
 			JSONArray superpeaks_json_array = new JSONArray();
@@ -473,6 +499,14 @@ public class PPeaklistFiles extends JPanel
         	            	
         	            	int distance_merge_peak = (int) (long) sp.get("distance_merge_peak");
         	            	
+        	            	
+        	            	String jmsainfoName = (String) sp.getOrDefault("jmsainfoName", "");
+        	            	String jmsainfoSpecie = (String) sp.getOrDefault("jmsainfoSpecie", "");
+        	            	String jmsainfoStrain = (String) sp.getOrDefault("jmsainfoStrain", "");
+        	            	String jmsainfoNotes = (String) sp.getOrDefault("jmsainfoNotes", "");
+        	            	String jmsainfoDNA = (String) sp.getOrDefault("jmsainfoDNA", "");
+        	            	
+        	    			
         		            Iterator<String> iterator_peaklists_id_ = peaklists_id.iterator();
         		            List<OPeaklist> peaklists = new ArrayList();
         		            
@@ -489,6 +523,12 @@ public class PPeaklistFiles extends JPanel
         						SuperPeaklist merged = new SuperPeaklist((ArrayList)peaklists);
         						merged.spectrumid = sp_id;
         						merged.setDistanceMergePeak(distance_merge_peak);
+        						merged.jmsainfoName = jmsainfoName;
+        						merged.jmsainfoSpecie = jmsainfoSpecie;
+        						merged.jmsainfoStrain = jmsainfoStrain;
+        						merged.jmsainfoNotes = jmsainfoNotes;
+        						merged.jmsainfoDNA = jmsainfoDNA;
+        						
         						FMainWindow.getInstance().addPeaklistToTable(merged);
         					} catch (ParserConfigurationException | SAXException | IOException e1) {
         						// TODO Auto-generated catch block
@@ -500,7 +540,7 @@ public class PPeaklistFiles extends JPanel
                 }
             };
             peaksLoader.afterEvent = afterLoadPeaklists;
-            peaksLoader.executarEvento();
+            peaksLoader.executeEvent();
             FMainWindow.getInstance().updateVisibleColums();
             
 

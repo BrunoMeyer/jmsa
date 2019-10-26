@@ -23,16 +23,22 @@ public class SuperPeaklist extends OPeaklist{
 	
 	public ArrayList<OPeak> peaklistMerged;
 	public SuperPeaklist(ArrayList<OPeaklist> peaklists) throws ParserConfigurationException, SAXException, IOException{
-		super(peaklists.get(0).peaklistFile);
+		
+		// super(peaklists.get(0).peaklistFile);
+		super(null);
+		
+		this.setColor();
+		
 		ArrayList<OPeaklist> clone = (ArrayList<OPeaklist>) peaklists.clone();
 		this.peaklists = clone;
 		
 		DecimalFormat decimalFormat = new DecimalFormat("#");
 		String threadId = decimalFormat.format(Thread.currentThread().getId());
 		String time = decimalFormat.format(System.currentTimeMillis());
-		this.spectrumid = "SE-"+time+threadId;
+		this.spectrumid = "SS-"+time+threadId;
 		this.buildPeaks();
 	}
+	
 	// Constructors
 	public SuperPeaklist(File peaklistFile) throws ParserConfigurationException, SAXException, IOException {
 		super(peaklistFile);
@@ -137,4 +143,28 @@ public class SuperPeaklist extends OPeaklist{
 		this.removePeaklist( peaklists.get(index) );
 		this.buildPeaks();
 	}
+	
+	// Super Spectres doesnt have information file
+	@Override
+	public void saveJMSAINFO() {
+		return;
+	}
+	
+	@Override
+	public void readXML() {
+		valid = true;
+		return;
+	}
+	
+	@Override
+	public void readJMSAINFO() {
+		return;
+	}
+	
+	@Override
+	public void readRawSpectreData() {
+		return;
+	}
+	
+	
 }

@@ -87,7 +87,7 @@ public class FMainWindow extends JFrame
     public JTabbedPane tabbedPaneDatabase = new JTabbedPane(JTabbedPane.TOP);
     public PPeaklistFiles panelSpectraPeaklistFiles = new PPeaklistFiles("Spectra", this);
     public PPeaklistFiles panelSpectraPeaklistFilesDB = new PPeaklistFiles("Data Base", this);
-    public PPeaklistFiles panelSpectraPeaklistFilesSE = new PPeaklistFiles("Super Spectra", this);
+    public PPeaklistFiles panelSpectraPeaklistFilesSS = new PPeaklistFiles("Super Spectra", this);
     public JPanel panelPeaklist = new JPanel();
     public JPanel panelDatabase = new JPanel();
     public JPanel panelPeaklistTablesPlots = new JPanel();
@@ -123,6 +123,7 @@ public class FMainWindow extends JFrame
     public JCheckBoxMenuItem checkBoxMenuItemShowMSSpecies = new JCheckBoxMenuItem("Show Species", CConfig.getInstance().showMSSpecies);
     public JCheckBoxMenuItem checkBoxMenuItemShowMSStrain = new JCheckBoxMenuItem("Show Strain", CConfig.getInstance().showMSStrain);
     public JCheckBoxMenuItem checkBoxMenuItemShowFilePath = new JCheckBoxMenuItem("Show File Path", CConfig.getInstance().showFilePath);
+    public JCheckBoxMenuItem checkBoxMenuItemShowSuperSpectreSize = new JCheckBoxMenuItem("Show SuperSpectre Size (total of individual spectres)", CConfig.getInstance().showFilePath);
     public JCheckBoxMenuItem checkBoxMenuItemPlotTitleName = new JCheckBoxMenuItem("Name", CConfig.getInstance().plotTitleName);
     public JCheckBoxMenuItem checkBoxMenuItemPlotTitleSpectrumID = new JCheckBoxMenuItem("SpectrumID", CConfig.getInstance().plotTitleSpectrumID);
     public JCheckBoxMenuItem checkBoxMenuItemPlotTitleSpecies = new JCheckBoxMenuItem("Species", CConfig.getInstance().plotTitleSpecies);
@@ -206,6 +207,7 @@ public class FMainWindow extends JFrame
         menuShowColumns.add(checkBoxMenuItemShowMSSpecies);
         menuShowColumns.add(checkBoxMenuItemShowMSStrain);
         menuShowColumns.add(checkBoxMenuItemShowFilePath);
+        menuShowColumns.add(checkBoxMenuItemShowSuperSpectreSize);
         menuPlotTitle.add(checkBoxMenuItemPlotTitleName);
         menuPlotTitle.add(checkBoxMenuItemPlotTitleSpectrumID);
         menuPlotTitle.add(checkBoxMenuItemPlotTitleSpecies);
@@ -233,7 +235,7 @@ public class FMainWindow extends JFrame
         splitPane.add(tabbedPaneMain);
         panelStatusBar.add(labelStatusBar, BorderLayout.CENTER);
         tabbedPaneFiles.addTab("Spectra", panelSpectraPeaklistFiles);
-        tabbedPaneFiles.addTab("Super Spectra", panelSpectraPeaklistFilesSE);
+        tabbedPaneFiles.addTab("Super Spectra", panelSpectraPeaklistFilesSS);
         tabbedPaneFiles.addTab("Data Base", panelSpectraPeaklistFilesDB);
 
         tabbedPaneMain.addTab("Peaklist", panelPeaklist);
@@ -443,6 +445,7 @@ public class FMainWindow extends JFrame
                     case "ShowMSSpecies":
                     case "ShowMSStrain":
                     case "ShowFilePath":
+                    case "ShowSuperSpectreSize":
                     case "PlotTitleName":
                     case "PlotTitleSpectrumID":
                     case "PlotTitleSpecies":
@@ -454,6 +457,7 @@ public class FMainWindow extends JFrame
                         CConfig.getInstance().showMSSpecies = checkBoxMenuItemShowMSSpecies.isSelected();
                         CConfig.getInstance().showMSStrain = checkBoxMenuItemShowMSStrain.isSelected();
                         CConfig.getInstance().showFilePath = checkBoxMenuItemShowFilePath.isSelected();
+                        CConfig.getInstance().showSuperSpectreSize = checkBoxMenuItemShowSuperSpectreSize.isSelected();
                         CConfig.getInstance().plotTitleName = checkBoxMenuItemPlotTitleName.isSelected();
                         CConfig.getInstance().plotTitleSpectrumID = checkBoxMenuItemPlotTitleSpectrumID.isSelected();
                         CConfig.getInstance().plotTitleSpecies = checkBoxMenuItemPlotTitleSpecies.isSelected();
@@ -514,7 +518,7 @@ public class FMainWindow extends JFrame
                     	);
                     	filter = new FileNameExtensionFilter(null, "zip");
                     	chooserSave.setFileFilter(filter);
-                        chooserSave.setSelectedFile(new File("database_name.jmsadb.zip"));
+                        chooserSave.setSelectedFile(new File("database_name.jmsadb"));
                         
                     	retrival = chooserSave.showSaveDialog(null);
                         
@@ -633,12 +637,15 @@ public class FMainWindow extends JFrame
         checkBoxMenuItemShowMSSpecies.setActionCommand("ShowMSSpecies");
         checkBoxMenuItemShowMSStrain.setActionCommand("ShowMSStrain");
         checkBoxMenuItemShowFilePath.setActionCommand("ShowFilePath");
+        checkBoxMenuItemShowSuperSpectreSize.setActionCommand("ShowSuperSpectreSize");
+        
         //
         checkBoxMenuItemShowMSName.addActionListener(actionListener);
         checkBoxMenuItemShowMSSpectrumID.addActionListener(actionListener);
         checkBoxMenuItemShowMSSpecies.addActionListener(actionListener);
         checkBoxMenuItemShowMSStrain.addActionListener(actionListener);
         checkBoxMenuItemShowFilePath.addActionListener(actionListener);
+        checkBoxMenuItemShowSuperSpectreSize.addActionListener(actionListener);
         //
         checkBoxMenuItemPlotTitleName.setActionCommand("PlotTitleName");
         checkBoxMenuItemPlotTitleSpectrumID.setActionCommand("PlotTitleSpectrumID");
@@ -719,14 +726,14 @@ public class FMainWindow extends JFrame
     public boolean isPeaklistsSelected() {
     	return tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFiles;
     }
-    public boolean isSESelected() {
-    	return tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesSE;
+    public boolean isSuperSpectreSelected() {
+    	return tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesSS;
     }    
     public boolean isDBSelected() {
     	return tabbedPaneFiles.getSelectedComponent() == panelSpectraPeaklistFilesDB;
     }
     public boolean isLoadingSelected() {
-    	return  isPeaklistsSelected() || isSESelected();
+    	return  isPeaklistsSelected() || isSuperSpectreSelected();
     }
     
     public void setAllSelectedValue(boolean value){
@@ -734,8 +741,8 @@ public class FMainWindow extends JFrame
     	if(isPeaklistsSelected() && panelSpectraPeaklistFiles.defaultTableModel.peaklists.size() > 0) {
 			panelSpectraPeaklistFiles.defaultTableModel.setAllValuesAt(value, 1);
     	}
-    	if(isSESelected() && panelSpectraPeaklistFilesSE.defaultTableModel.peaklists.size() > 0) {
-    		panelSpectraPeaklistFilesSE.defaultTableModel.setAllValuesAt(value, 1);
+    	if(isSuperSpectreSelected() && panelSpectraPeaklistFilesSS.defaultTableModel.peaklists.size() > 0) {
+    		panelSpectraPeaklistFilesSS.defaultTableModel.setAllValuesAt(value, 1);
     	}
     	lockUpdatePanels = false;
     	firePeaklistPanelChange();
@@ -743,23 +750,27 @@ public class FMainWindow extends JFrame
     
     public List<OPeaklist> getLoadingSelectedPeaklists() {
     	List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getSelectedPeaklists();
-		List<OPeaklist> superpeaklists = panelSpectraPeaklistFilesSE.defaultTableModel.getSelectedPeaklists();
-    	peaklists.addAll(superpeaklists);
-    	return peaklists;
+		List<OPeaklist> superpeaklists = panelSpectraPeaklistFilesSS.defaultTableModel.getSelectedPeaklists();
+    	ArrayList<OPeaklist> merged = new ArrayList<OPeaklist>();
+    	merged.addAll(peaklists);
+    	merged.addAll(superpeaklists);
+    	return merged;
     }
     public List<OPeaklist> getLoadingPeaklists() {
     	List<OPeaklist> peaklists = panelSpectraPeaklistFiles.defaultTableModel.getAllPeaklists();
-		List<OPeaklist> superpeaklists = panelSpectraPeaklistFilesSE.defaultTableModel.getAllPeaklists();
-    	peaklists.addAll(superpeaklists);
-    	return peaklists;
+		List<OPeaklist> superpeaklists = panelSpectraPeaklistFilesSS.defaultTableModel.getAllPeaklists();
+		ArrayList<OPeaklist> merged = new ArrayList<OPeaklist>();
+    	merged.addAll(peaklists);
+    	merged.addAll(superpeaklists);
+    	return merged;
     }
     
     public void firePeaklistPanelChange() {
     	if(isPeaklistsSelected()) {
     		panelSpectraPeaklistFiles.defaultTableModel.fireTableDataChanged();
     	}
-    	if(isSESelected()) {
-    		panelSpectraPeaklistFilesSE.defaultTableModel.fireTableDataChanged();
+    	if(isSuperSpectreSelected()) {
+    		panelSpectraPeaklistFilesSS.defaultTableModel.fireTableDataChanged();
     	}
     	if(isDBSelected()) {
     		panelSpectraPeaklistFilesDB.defaultTableModel.fireTableDataChanged();
@@ -770,7 +781,7 @@ public class FMainWindow extends JFrame
     {
     	if(isLoadingSelected()) {
     		panelSpectraPeaklistFiles.clearTable();
-    		panelSpectraPeaklistFilesSE.clearTable();
+    		panelSpectraPeaklistFilesSS.clearTable();
     	}
     	if(isDBSelected()) {
     		panelSpectraPeaklistFilesDB.clearTable();
@@ -781,7 +792,7 @@ public class FMainWindow extends JFrame
     {
     	if(isLoadingSelected()) {
     		panelSpectraPeaklistFiles.defaultTableModel.globalTrigger = active;
-    		panelSpectraPeaklistFilesSE.defaultTableModel.globalTrigger = active;
+    		panelSpectraPeaklistFilesSS.defaultTableModel.globalTrigger = active;
     	}
     	if(isDBSelected()) {
     		panelSpectraPeaklistFilesDB.defaultTableModel.globalTrigger = active;
@@ -792,7 +803,7 @@ public class FMainWindow extends JFrame
     {
     	if(isLoadingSelected()){ 
     		panelSpectraPeaklistFiles.defaultTableModel.fireTableDataChanged();
-    		panelSpectraPeaklistFilesSE.defaultTableModel.fireTableDataChanged();
+    		panelSpectraPeaklistFilesSS.defaultTableModel.fireTableDataChanged();
     	}
     	if(isDBSelected()) {
     		panelSpectraPeaklistFilesDB.defaultTableModel.fireTableDataChanged();
@@ -814,7 +825,7 @@ public class FMainWindow extends JFrame
     public void addPeaklistToLoadingTable(final OPeaklist peaklist)
     {
     	if(peaklist instanceof SuperPeaklist) {
-			panelSpectraPeaklistFilesSE.addPeaklistToTable(peaklist);
+			panelSpectraPeaklistFilesSS.addPeaklistToTable(peaklist);
 		}
 		else {
 			panelSpectraPeaklistFiles.addPeaklistToTable(peaklist);
@@ -870,21 +881,24 @@ public class FMainWindow extends JFrame
         		checkBoxMenuItemShowMSSpectrumID.isSelected(),
         		checkBoxMenuItemShowMSSpecies.isSelected(),
         		checkBoxMenuItemShowMSStrain.isSelected(),
-        		checkBoxMenuItemShowFilePath.isSelected()
+        		checkBoxMenuItemShowFilePath.isSelected(),
+        		checkBoxMenuItemShowSuperSpectreSize.isSelected()
         );
-    	panelSpectraPeaklistFilesSE.setVisibleColumns(
+    	panelSpectraPeaklistFilesSS.setVisibleColumns(
         		checkBoxMenuItemShowMSName.isSelected(),
         		checkBoxMenuItemShowMSSpectrumID.isSelected(),
         		checkBoxMenuItemShowMSSpecies.isSelected(),
         		checkBoxMenuItemShowMSStrain.isSelected(),
-        		checkBoxMenuItemShowFilePath.isSelected()
+        		checkBoxMenuItemShowFilePath.isSelected(),
+        		checkBoxMenuItemShowSuperSpectreSize.isSelected()
         );
         panelSpectraPeaklistFilesDB.setVisibleColumns(
         		checkBoxMenuItemShowMSName.isSelected(),
         		checkBoxMenuItemShowMSSpectrumID.isSelected(),
         		checkBoxMenuItemShowMSSpecies.isSelected(),
         		checkBoxMenuItemShowMSStrain.isSelected(),
-        		checkBoxMenuItemShowFilePath.isSelected()
+        		checkBoxMenuItemShowFilePath.isSelected(),
+        		checkBoxMenuItemShowSuperSpectreSize.isSelected()
         );
         
         if(isDBSelected()) {
